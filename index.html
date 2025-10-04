@@ -111,6 +111,184 @@
             font-size: 16px;
         }
 
+        /* Filtros */
+        .filter-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-select, .filter-input {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: white;
+            font-size: 0.9rem;
+            width: 100%;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-secondary {
+            background-color: var(--gray);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        /* Tabela de Atendimentos */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .atendimentos-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .atendimentos-table th {
+            background-color: var(--light);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .atendimentos-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .atendimentos-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .atendimentos-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .diretoria-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .diretoria-store {
+            background-color: #6366f1;
+        }
+
+        .diretoria-homesphere {
+            background-color: #10b981;
+        }
+
+        .diretoria-parcerias {
+            background-color: #f59e0b;
+        }
+
+        .diretoria-ferrari {
+            background-color: #ef4444;
+        }
+
+        .diretoria-diretoria {
+            background-color: #8b5cf6;
+        }
+
+        .diretoria-sell {
+            background-color: #06b6d4;
+        }
+
+        .tipo-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background-color: #e5e7eb;
+            color: var(--dark);
+        }
+
+        /* Métricas */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -174,32 +352,8 @@
             margin-top: 4px;
         }
 
-        .metric-content .pending-data {
-            font-weight: 700;
-            color: var(--danger);
-        }
-
-        .metric-card.total-card {
-            background-color: var(--light);
-            border: 1px solid var(--border);
-        }
-
-        .progress-bar {
-            background-color: #e5e7eb;
-            border-radius: 9999px;
-            height: 8px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        .progress-bar .progress {
-            height: 100%;
-            background-color: var(--success);
-            transition: width 0.5s ease-in-out;
-        }
-
-        .timeline-header,
-        .execucao-header {
+        /* Timeline */
+        .timeline-header {
             text-align: center;
             font-size: 24px;
             font-weight: 700;
@@ -263,87 +417,49 @@
             font-weight: bold;
         }
 
-        .timeline-card ul li.pending {
-            font-weight: 700;
-            color: var(--danger);
-            text-transform: uppercase;
-        }
-
-        .execucao-grid {
+        /* Paginação */
+        .pagination {
             display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            gap: 20px;
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-            scroll-behavior: smooth;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-top: 1px solid var(--border);
+            background-color: var(--light);
         }
 
-        .execucao-card {
-            flex: 0 0 auto;
-            width: 300px;
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: var(--card-shadow);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .execucao-card h3 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--success);
-            margin-bottom: 8px;
-        }
-
-        .execucao-card h5 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 15px;
-        }
-
-        .execucao-card p {
+        .pagination-info {
             font-size: 0.9rem;
             color: var(--gray);
-            margin-bottom: 5px;
         }
 
-        .execucao-card .progress-bar {
-            margin-top: 15px;
-        }
-
-        .executive-message-card {
-            background-color: var(--light);
-            border: 1px solid var(--border);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .executive-message-card .header {
+        .pagination-controls {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
+            gap: 10px;
         }
 
-        .executive-message-card h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
+        .pagination-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         /* Tooltip Styles */
@@ -393,6 +509,16 @@
             border-right: 5px solid transparent;
             border-bottom: 5px solid var(--dark);
         }
+
+        .date-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .date-range .filter-group {
+            flex: 1;
+        }
     </style>
 </head>
 
@@ -407,11 +533,13 @@
             <div class="tabs">
                 <div class="tab active" data-target="resumo">Resumo da Semana</div>
                 <div class="tab" data-target="resumo-mes">Resumo do Mês</div>
+                <div class="tab" data-target="controle-atendimentos">Controle de Atendimentos</div>
                 <div class="tab" data-target="tratativas">Pipeline de Tratativas</div>
                 <div class="tab" data-target="agenda-quaddra">Agenda Semanal</div>
             </div>
         </header>
 
+        <!-- Resumo da Semana -->
         <div id="resumo" class="dashboard active">
             <div class="dashboard-header">
                 <h1 class="dashboard-title">
@@ -455,7 +583,7 @@
                         <p class="info-text">Store: 2 / Homesphere: 1 / Parcerias: 3</p>
                     </div>
                 </div>
-                <div class="metric-card total-card">
+                <div class="metric-card">
                     <div class="metric-header">
                         <div class="icon" style="color: #ef4444;"><i class="fas fa-file-invoice-dollar"></i></div>
                         <h3>Propostas</h3>
@@ -496,6 +624,7 @@
             </div>
         </div>
 
+        <!-- Resumo do Mês -->
         <div id="resumo-mes" class="dashboard">
             <div class="dashboard-header">
                 <h1 class="dashboard-title">
@@ -539,7 +668,7 @@
                         <p class="info-text">Store: 6 / Homesphere: 6 / Parcerias: 7</p>
                     </div>
                 </div>
-                <div class="metric-card total-card">
+                <div class="metric-card">
                     <div class="metric-header">
                         <div class="icon" style="color: #10b981;"><i class="fas fa-file-invoice-dollar"></i></div>
                         <h3>Vendas</h3>
@@ -595,157 +724,146 @@
                     </ul>
                 </div>
             </div>
+        </div>
 
-            <h2 class="timeline-header">Metas vs Realizações</h2>
-            <div class="timeline-container">
-                <div class="timeline-card">
-                    <h4><i class="fas fa-target" style="color: #10b981;"></i> Metas Mensais</h4>
-                    <h5>Objetivos Estabelecidos</h5>
-                    <ul>
-                        <li>STORE: <span class="pending-data">-- vendas</span></li>
-                        <li>Ferrari: <span class="pending-data">-- vendas</span></li>
-                        <li>Homesphere: <span class="pending-data">-- vendas</span></li>
-                        <li>Parcerias: <span class="pending-data">-- vendas</span></li>
-                    </ul>
+        <!-- Painel de Controle de Atendimentos -->
+        <div id="controle-atendimentos" class="dashboard">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">
+                    <i class="fas fa-calendar-check" style="color: #3b82f6;"></i>
+                    Controle de Atendimentos
+                </h1>
+                <p class="dashboard-subtitle">Gestão completa de visitas e atendimentos comerciais</p>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filter-container">
+                <div class="date-range">
+                    <div class="filter-group">
+                        <label for="filterDataInicio"><i class="fas fa-calendar"></i> Data Início</label>
+                        <input type="date" id="filterDataInicio" class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterDataFim"><i class="fas fa-calendar"></i> Data Fim</label>
+                        <input type="date" id="filterDataFim" class="filter-input">
+                    </div>
                 </div>
-                <div class="timeline-card">
-                    <h4><i class="fas fa-chart-line" style="color: #3b82f6;"></i> Realizações</h4>
-                    <h5>Resultados Alcançados</h5>
-                    <ul>
-                        <li>STORE: <span class="pending-data">-- vendas</span></li>
-                        <li>Ferrari: <span class="pending-data">-- vendas</span></li>
-                        <li>Homesphere: <span class="pending-data">-- vendas</span></li>
-                        <li>Parcerias: <span class="pending-data">-- vendas</span></li>
-                    </ul>
+                <div class="filter-group">
+                    <label for="filterDiretoria"><i class="fas fa-building"></i> Diretoria</label>
+                    <select id="filterDiretoria" class="filter-select">
+                        <option value="todas">Todas as Directorias</option>
+                        <option value="YUNY STORE">YUNY STORE</option>
+                        <option value="HOMESPHERE">HOMESPHERE</option>
+                        <option value="PARCERIAS">PARCERIAS</option>
+                        <option value="DIRETORIA">DIRETORIA</option>
+                        <option value="YUNY SELL">YUNY SELL</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterTipo"><i class="fas fa-tag"></i> Tipo de Visita</label>
+                    <select id="filterTipo" class="filter-select">
+                        <option value="todos">Todos os Tipos</option>
+                        <option value="Vez">Vez</option>
+                        <option value="Indicação">Indicação</option>
+                        <option value="Retorno">Retorno</option>
+                        <option value="Ligação">Ligação</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-primary" onclick="aplicarFiltros()">
+                        <i class="fas fa-filter"></i> Aplicar Filtros
+                    </button>
+                    <button class="btn btn-secondary" onclick="limparFiltros()">
+                        <i class="fas fa-undo"></i> Limpar
+                    </button>
                 </div>
             </div>
 
-            <div style="margin-top: 40px; border-top: 2px solid var(--border); padding-top: 30px;">
-                <div class="dashboard-header">
-                    <h1 class="dashboard-title" style="font-size: 24px;">
-                        <i class="fas fa-history" style="color: #6b7280;"></i>
-                        Dados Históricos - AGOSTO
-                    </h1>
-                    <p class="dashboard-subtitle">Panorama Mensal - AGOSTO</p>
-                </div>
-
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="icon" style="color: #3b82f6;"><i class="fas fa-door-open"></i></div>
-                            <h3>Visitas</h3>
-                        </div>
-                        <div class="metric-content">
-                            <p>Total de visitas:</p>
-                            <strong>40</strong>
-                            <p class="info-text">Store: 26 / Homesphere: 11 / Sell: 1</p>
-                        </div>
+            <!-- Métricas Rápidas -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="icon" style="color: #3b82f6;"><i class="fas fa-calendar-check"></i></div>
+                        <h3>Total de Atendimentos</h3>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="icon" style="color: #6366f1;"><i class="fas fa-user-friends"></i></div>
-                            <h3>Indicações</h3>
-                        </div>
-                        <div class="metric-content">
-                            <p>Total de indicações:</p>
-                            <strong>51</strong>
-                            <p class="info-text">Homesphere: 18 / Store: 17 / Parcerias: 15 / Sell: 1</p>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="icon" style="color: #f59e0b;"><i class="fas fa-reply"></i></div>
-                            <h3>Retornos</h3>
-                        </div>
-                        <div class="metric-content">
-                            <p>Retornos no mês:</p>
-                            <strong>13</strong>
-                            <p class="info-text">Store: 5 / Homesphere: 5 / Parcerias: 3</p>
-                        </div>
-                    </div>
-                    <div class="metric-card total-card">
-                        <div class="metric-header">
-                            <div class="icon" style="color: #ef4444;"><i class="fas fa-file-invoice-dollar"></i></div>
-                            <h3>Vendas</h3>
-                        </div>
-                        <div class="metric-content">
-                            <p>Vendas realizadas:</p>
-                            <strong>0</strong>
-                            <p class="info-text">Nenhuma empresa teve venda este mês</p>
-                        </div>
+                    <div class="metric-content">
+                        <strong id="totalAtendimentos">0</strong>
+                        <p class="info-text">No período selecionado</p>
                     </div>
                 </div>
-
-                <h2 class="timeline-header">Performance Mensal por Diretoria - AGOSTO</h2>
-                <div class="timeline-container">
-                    <div class="timeline-card">
-                        <h4><i class="fas fa-store-alt" style="color: #6366f1;"></i> STORE</h4>
-                        <h5>Performance do Mês</h5>
-                        <ul>
-                            <li>Visitas: 26</li>
-                            <li>Indicações: 17</li>
-                            <li>Retornos: 5</li>
-                            <li>Vendas: 0</li>
-                        </ul>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="icon" style="color: #10b981;"><i class="fas fa-store-alt"></i></div>
+                        <h3>YUNY STORE</h3>
                     </div>
-                    <div class="timeline-card">
-                        <h4><i class="fas fa-home" style="color: #6366f1;"></i> Homesphere</h4>
-                        <h5>Performance do Mês</h5>
-                        <ul>
-                            <li>Visitas: 11</li>
-                            <li>Indicações: 18</li>
-                            <li>Retornos: 5</li>
-                            <li>Vendas: 0</li>
-                        </ul>
-                    </div>
-                    <div class="timeline-card">
-                        <h4><i class="fas fa-handshake" style="color: #6366f1;"></i> Parcerias</h4>
-                        <h5>Performance do Mês</h5>
-                        <ul>
-                            <li>Visitas: 0</li>
-                            <li>Indicações: 15</li>
-                            <li>Retornos: 3</li>
-                            <li>Vendas: 0</li>
-                        </ul>
-                    </div>
-                    <div class="timeline-card">
-                        <h4><i class="fas fa-star" style="color: #f59e0b;"></i> Sell</h4>
-                        <h5>Performance do Mês</h5>
-                        <ul>
-                            <li>Visitas: 1</li>
-                            <li>Indicações: 1</li>
-                            <li>Retornos: 0</li>
-                            <li>Vendas: 0</li>
-                        </ul>
+                    <div class="metric-content">
+                        <strong id="totalStore">0</strong>
+                        <p class="info-text">Atendimentos da Store</p>
                     </div>
                 </div>
-
-                <h2 class="timeline-header">Metas vs Realizações - AGOSTO</h2>
-                <div class="timeline-container">
-                    <div class="timeline-card">
-                        <h4><i class="fas fa-target" style="color: #10b981;"></i> Metas Mensais</h4>
-                        <h5>Objetivos Estabelecidos</h5>
-                        <ul>
-                            <li>STORE: <span class="pending-data">-- vendas</span></li>
-                            <li>Ferrari: <span class="pending-data">-- vendas</span></li>
-                            <li>Homesphere: <span class="pending-data">-- vendas</span></li>
-                            <li>Parcerias: <span class="pending-data">-- vendas</span></li>
-                        </ul>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="icon" style="color: #f59e0b;"><i class="fas fa-home"></i></div>
+                        <h3>HOMESPHERE</h3>
                     </div>
-                    <div class="timeline-card">
-                        <h4><i class="fas fa-chart-line" style="color: #3b82f6;"></i> Realizações</h4>
-                        <h5>Resultados Alcançados</h5>
-                        <ul>
-                            <li>STORE: <span class="pending-data">-- vendas</span></li>
-                            <li>Ferrari: <span class="pending-data">-- vendas</span></li>
-                            <li>Homesphere: <span class="pending-data">-- vendas</span></li>
-                            <li>Parcerias: <span class="pending-data">-- vendas</span></li>
-                        </ul>
+                    <div class="metric-content">
+                        <strong id="totalHomesphere">0</strong>
+                        <p class="info-text">Atendimentos Homesphere</p>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="icon" style="color: #ef4444;"><i class="fas fa-handshake"></i></div>
+                        <h3>PARCERIAS</h3>
+                    </div>
+                    <div class="metric-content">
+                        <strong id="totalParcerias">0</strong>
+                        <p class="info-text">Atendimentos Parcerias</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Atendimentos -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title">Registro de Atendimentos</h3>
+                    <div class="pagination-info" id="paginationInfo">
+                        Mostrando 0 de 0 registros
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="atendimentos-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo de Visita</th>
+                                <th>Corretor</th>
+                                <th>Gerente</th>
+                                <th>Empresa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaAtendimentos">
+                            <!-- Dados serão carregados via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <div class="pagination-info" id="paginationInfoBottom">
+                        Mostrando 0 de 0 registros
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" onclick="mudarPagina(-1)" disabled id="btnPrev">
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </button>
+                        <button class="pagination-btn" onclick="mudarPagina(1)" id="btnNext">
+                            Próxima <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Pipeline de Tratativas -->
         <div id="tratativas" class="dashboard">
             <div class="dashboard-header">
                 <h1 class="dashboard-title">
@@ -778,22 +896,6 @@
                             <li class="tratativa-item" data-tooltip="Venda compartilhada entre HOMESPHERE e PARCERIAS. 50% cada">101 Europa - ONLINE (meia venda)</li>
                         </ul>
                     </div>
-                    <div class="list-group">
-                        <h5><i class="fas fa-handshake" style="color: #6366f1;"></i> **PARCERIAS**</h5>
-                        <ul>
-                            <li class="tratativa-item" data-tooltip="Venda compartilhada entre PARCERIAS e HOMESPHERE. 50% cada">101 Europa - ONLINE (meia venda)</li>
-                            <li class="tratativa-item">81 Jardins – Carteira</li>
-                        </ul>
-                    </div>
-                    <div class="list-group">
-                        <h5><i class="fas fa-user-tie" style="color: #3b82f6;"></i> **DIRETA**</h5>
-                        <ul>
-                            <li class="tratativa-item">81 Europa</li>
-                            <li class="tratativa-item" data-tooltip="Cris">81 Parque</li>
-                            <li class="tratativa-item" data-tooltip="Carlos">131 Parque</li>
-                            <li class="tratativa-item" data-tooltip="Anitta">121 Parque</li>
-                        </ul>
-                    </div>
                 </div>
 
                 <div class="timeline-card" style="width: 320px;">
@@ -817,72 +919,65 @@
                         <li class="tratativa-item">52 Europa - Parcerias (R$ 10.000.000)</li>
                     </ul>
                 </div>
-                <div class="timeline-card" style="width: 320px;">
-                    <h4><i class="fas fa-comments" style="color: #ef4444;"></i> Tratativas</h4>
-                    <h5>Em negociação ativa</h5>
-                    <ul>
-                        <li class="tratativa-item">102 Europa - Ferrari</li>
-                        <li class="tratativa-item">52 Europa - Ferrari</li>
-                    </ul>
-                </div>
             </div>
         </div>
 
+        <!-- Agenda Semanal -->
         <div id="agenda-quaddra" class="dashboard">
             <div class="dashboard-header">
                 <h1 class="dashboard-title">
                     <i class="fas fa-calendar-alt" style="color: #10b981;"></i>
                     AGENDA SEMANAL QUADDRA!
                 </h1>
-                <p class="dashboard-subtitle">22/09/25 a 28/09/25 </p>
+                <p class="dashboard-subtitle">Semana de 08/09 a 14/09</p>
             </div>
 
             <div class="timeline-container">
                 <div class="timeline-card">
                     <h4><i class="fas fa-calendar-day"></i> Segunda</h4>
-                    <h5>22/09</h5>
+                    <h5>08/09</h5>
                     <ul>
                         <li>—</li>
                     </ul>
                 </div>
                 <div class="timeline-card">
                     <h4><i class="fas fa-calendar-day"></i> Terça</h4>
-                    <h5>23/09</h5>
+                    <h5>09/09</h5>
                     <ul>
-                        <li> </li>
+                        <li>OFERTA COM PIZZA</li>
                     </ul>
                 </div>
                 <div class="timeline-card">
                     <h4><i class="fas fa-calendar-day"></i> Quarta</h4>
-                    <h5>24/09</h5>
+                    <h5>10/09</h5>
                     <ul>
-                        <li> </li>
+                        <li>EVENTO CARUSO QUEIJOS E VINHOS</li>
                     </ul>
                 </div>
                 <div class="timeline-card">
                     <h4><i class="fas fa-calendar-day"></i> Quinta</h4>
-                    <h5>25/09</h5>
+                    <h5>11/09</h5>
                     <ul>
-                        <li> </li>
+                        <li>EVENTO DIRETORES QUEIJOS E VINHOS</li>
                     </ul>
                 </div>
                 <div class="timeline-card">
                     <h4><i class="fas fa-calendar-day"></i> Sexta</h4>
-                    <h5>26/09</h5>
+                    <h5>12/09</h5>
                     <ul>
                         <li>—</li>
                     </ul>
                 </div>
                 <div class="timeline-card">
                     <h4><i class="fas fa-calendar-day"></i> Sábado</h4>
-                    <h5>27/09</h5>
+                    <h5>13/09</h5>
                     <ul>
                         <li>BLITZ + 2 PONTOS DE CAPTAÇÃO</li>
                     </ul>
                 </div>
                 <div class="timeline-card">
                     <h4><i class="fas fa-calendar-day"></i> Domingo</h4>
-                    <h5>28/09</h5>
+                    <h5>14/09</h5>
                     <ul>
                         <li>BLITZ + 2 PONTOS DE CAPTAÇÃO</li>
                     </ul>
@@ -890,12 +985,58 @@
             </div>
         </div>
     </div>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // Dados da planilha convertidos para JSON (exemplo com alguns registros)
+        const atendimentosData = [
+            { data: '2025-05-19', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
+            { data: '2025-05-19', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
+            { data: '2025-05-19', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
+            { data: '2025-05-19', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
+            { data: '2025-05-22', tipo: 'Indicação', corretor: 'Thiago', gerente: 'Zambon', empresa: 'HOMESPHERE' },
+            { data: '2025-05-23', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
+            { data: '2025-05-24', tipo: 'Indicação', corretor: 'Guerra', gerente: 'Ricardo', empresa: 'PARCERIAS' },
+            { data: '2025-05-24', tipo: 'Indicação', corretor: 'Renata', gerente: 'Rodrigo', empresa: 'YUNY STORE' },
+            { data: '2025-05-24', tipo: 'Indicação', corretor: '', gerente: 'Gerente do online: Ruty', empresa: 'YUNY STORE' },
+            { data: '2025-05-24', tipo: 'Indicação', corretor: 'Castro', gerente: 'Castro', empresa: 'DIRETORIA' },
+            { data: '2025-05-24', tipo: 'Vez', corretor: 'Luiz (Diretor de vendas)', gerente: 'Luiz (Diretor de vendas)', empresa: 'YUNY STORE' },
+            { data: '2025-05-24', tipo: 'Vez', corretor: 'Luiz (Diretor de vendas)', gerente: 'Luiz (Diretor de vendas)', empresa: 'YUNY STORE' },
+            { data: '2025-05-25', tipo: 'Indicação', corretor: 'Luis', gerente: 'Luiz (Diretor de vendas)', empresa: 'YUNY STORE' },
+            { data: '2025-05-25', tipo: 'Indicação', corretor: 'Luis', gerente: 'Luiz (Diretor de vendas)', empresa: 'YUNY STORE' },
+            { data: '2025-05-25', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
+            { data: '2025-05-26', tipo: 'Vez', corretor: 'sem atendimento', gerente: '', empresa: 'YUNY STORE' },
+            { data: '2025-05-27', tipo: 'Indicação', corretor: 'YUNY HOME', gerente: '', empresa: 'HOMESPHERE' },
+            { data: '2025-05-27', tipo: 'Indicação', corretor: 'YUNY HOME', gerente: '', empresa: 'HOMESPHERE' },
+            { data: '2025-05-30', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
+            { data: '2025-05-31', tipo: 'Indicação', corretor: 'Bortman', gerente: 'Turra', empresa: 'YUNY STORE' },
+            { data: '2025-05-31', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
+            { data: '2025-05-31', tipo: 'Vez', corretor: 'Vanessa', gerente: 'Home', empresa: 'HOMESPHERE' },
+            { data: '2025-05-31', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
+            { data: '2025-05-31', tipo: 'Vez', corretor: 'Riko', gerente: 'Ruty', empresa: 'YUNY STORE' },
+            { data: '2025-05-31', tipo: 'Vez', corretor: 'Leon', gerente: 'Carriel', empresa: 'YUNY STORE' },
+            // Adicione aqui todos os outros dados da sua planilha seguindo o mesmo padrão
+        ];
+
+        let atendimentosFiltrados = [...atendimentosData];
+        let filtrosAtivos = {};
+        let paginaAtual = 1;
+        const itensPorPagina = 10;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Definir datas padrão (últimos 30 dias)
+            const dataFim = new Date();
+            const dataInicio = new Date();
+            dataInicio.setDate(dataInicio.getDate() - 30);
+            
+            document.getElementById('filterDataInicio').value = dataInicio.toISOString().split('T')[0];
+            document.getElementById('filterDataFim').value = dataFim.toISOString().split('T')[0];
+            
+            aplicarFiltros();
+            
+            // Sistema de abas
             const tabs = document.querySelectorAll('.tab');
             const dashboards = document.querySelectorAll('.dashboard');
-            let currentTooltip = null;
 
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -909,11 +1050,12 @@
                 });
             });
 
+            // Tooltips
+            let currentTooltip = null;
             const tratativaItems = document.querySelectorAll('.tratativa-item[data-tooltip]');
 
             tratativaItems.forEach(item => {
                 item.addEventListener('mouseenter', (event) => {
-                    // Hide any existing tooltip
                     if (currentTooltip) {
                         currentTooltip.remove();
                         currentTooltip = null;
@@ -932,7 +1074,6 @@
                     let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
                     let top = rect.bottom + 10;
 
-                    // Adjust if tooltip goes off screen
                     if (left < 10) left = 10;
                     if (left + tooltipRect.width > window.innerWidth - 10) {
                         left = window.innerWidth - tooltipRect.width - 10;
@@ -941,7 +1082,6 @@
                     tooltip.style.left = left + 'px';
                     tooltip.style.top = top + 'px';
 
-                    // Show tooltip
                     requestAnimationFrame(() => {
                         tooltip.classList.add('show');
                     });
@@ -962,6 +1102,137 @@
                 });
             });
         });
+
+        // Funções de Filtro
+        function aplicarFiltros() {
+            const dataInicio = document.getElementById('filterDataInicio').value;
+            const dataFim = document.getElementById('filterDataFim').value;
+            
+            // Validar datas
+            if (dataInicio && dataFim && dataInicio > dataFim) {
+                alert('Data de início não pode ser maior que data de fim!');
+                return;
+            }
+
+            filtrosAtivos = {
+                dataInicio: dataInicio,
+                dataFim: dataFim,
+                diretoria: document.getElementById('filterDiretoria').value,
+                tipo: document.getElementById('filterTipo').value
+            };
+            
+            paginaAtual = 1;
+            carregarAtendimentos();
+            atualizarMetricas();
+        }
+
+        function limparFiltros() {
+            // Resetar para últimos 30 dias
+            const dataFim = new Date();
+            const dataInicio = new Date();
+            dataInicio.setDate(dataInicio.getDate() - 30);
+            
+            document.getElementById('filterDataInicio').value = dataInicio.toISOString().split('T')[0];
+            document.getElementById('filterDataFim').value = dataFim.toISOString().split('T')[0];
+            document.getElementById('filterDiretoria').value = 'todas';
+            document.getElementById('filterTipo').value = 'todos';
+            
+            filtrosAtivos = {};
+            paginaAtual = 1;
+            carregarAtendimentos();
+            atualizarMetricas();
+        }
+
+        // Carregar atendimentos na tabela
+        function carregarAtendimentos() {
+            const tbody = document.getElementById('tabelaAtendimentos');
+            tbody.innerHTML = '';
+
+            // Aplicar filtros
+            atendimentosFiltrados = atendimentosData.filter(atendimento => {
+                // Filtro por data
+                if (filtrosAtivos.dataInicio && atendimento.data < filtrosAtivos.dataInicio) return false;
+                if (filtrosAtivos.dataFim && atendimento.data > filtrosAtivos.dataFim) return false;
+                
+                // Filtro por diretoria
+                if (filtrosAtivos.diretoria !== 'todas' && atendimento.empresa !== filtrosAtivos.diretoria) return false;
+                
+                // Filtro por tipo
+                if (filtrosAtivos.tipo !== 'todos' && atendimento.tipo !== filtrosAtivos.tipo) return false;
+                
+                return true;
+            });
+
+            // Ordenar por data (mais recente primeiro)
+            atendimentosFiltrados.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            // Paginação
+            const inicio = (paginaAtual - 1) * itensPorPagina;
+            const fim = inicio + itensPorPagina;
+            const atendimentosPagina = atendimentosFiltrados.slice(inicio, fim);
+
+            // Atualizar controles de paginação
+            document.getElementById('btnPrev').disabled = paginaAtual === 1;
+            document.getElementById('btnNext').disabled = fim >= atendimentosFiltrados.length;
+            
+            const infoText = `Mostrando ${inicio + 1}-${Math.min(fim, atendimentosFiltrados.length)} de ${atendimentosFiltrados.length} registros`;
+            document.getElementById('paginationInfo').textContent = infoText;
+            document.getElementById('paginationInfoBottom').textContent = infoText;
+
+            // Preencher tabela
+            atendimentosPagina.forEach(atendimento => {
+                const tr = document.createElement('tr');
+                
+                // Mapeamento de badges
+                const diretoriaBadges = {
+                    'YUNY STORE': 'diretoria-store',
+                    'HOMESPHERE': 'diretoria-homesphere',
+                    'PARCERIAS': 'diretoria-parcerias',
+                    'DIRETORIA': 'diretoria-diretoria',
+                    'YUNY SELL': 'diretoria-sell'
+                };
+
+                tr.innerHTML = `
+                    <td>${formatarData(atendimento.data)}</td>
+                    <td><span class="tipo-badge">${atendimento.tipo}</span></td>
+                    <td>${atendimento.corretor || '-'}</td>
+                    <td>${atendimento.gerente || '-'}</td>
+                    <td><span class="diretoria-badge ${diretoriaBadges[atendimento.empresa]}">${atendimento.empresa}</span></td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+
+            // Se não houver resultados
+            if (atendimentosPagina.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">Nenhum atendimento encontrado com os filtros aplicados</td>`;
+                tbody.appendChild(tr);
+            }
+        }
+
+        function mudarPagina(direcao) {
+            paginaAtual += direcao;
+            carregarAtendimentos();
+        }
+
+        // Atualizar métricas
+        function atualizarMetricas() {
+            const totalAtendimentos = atendimentosFiltrados.length;
+            const totalStore = atendimentosFiltrados.filter(a => a.empresa === 'YUNY STORE').length;
+            const totalHomesphere = atendimentosFiltrados.filter(a => a.empresa === 'HOMESPHERE').length;
+            const totalParcerias = atendimentosFiltrados.filter(a => a.empresa === 'PARCERIAS').length;
+
+            document.getElementById('totalAtendimentos').textContent = totalAtendimentos;
+            document.getElementById('totalStore').textContent = totalStore;
+            document.getElementById('totalHomesphere').textContent = totalHomesphere;
+            document.getElementById('totalParcerias').textContent = totalParcerias;
+        }
+
+        // Funções auxiliares
+        function formatarData(data) {
+            return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+        }
     </script>
 
 </body>

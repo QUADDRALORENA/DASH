@@ -589,6 +589,30 @@
             background-color: var(--warning);
         }
 
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--primary);
+        }
+
+        .error-message {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success-message {
+            background-color: #d1fae5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
         @media (max-width: 768px) {
             .filter-container {
                 grid-template-columns: 1fr;
@@ -639,7 +663,10 @@
         </div>
     </header>
 
-    <!-- Resumo da Semana - DADOS MANUAIS -->
+    <!-- Área de Status -->
+    <div id="statusArea"></div>
+
+    <!-- Resumo da Semana -->
     <div id="resumo" class="dashboard active">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -705,9 +732,9 @@
                 </div>
             </div>
             <div class="chart-card">
-                <h4><i class="fas fa-chart-bar"></i> Evolução da Semana</h4>
+                <h4><i class="fas fa-chart-bar"></i> Tipo de Atendimento</h4>
                 <div class="chart-container">
-                    <canvas id="chartEvolucaoSemana"></canvas>
+                    <canvas id="chartTipoAtendimento"></canvas>
                 </div>
             </div>
         </div>
@@ -740,7 +767,7 @@
         </div>
     </div>
 
-    <!-- Resumo do Mês - DADOS MANUAIS -->
+    <!-- Resumo do Mês -->
     <div id="resumo-mes" class="dashboard">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -806,9 +833,9 @@
                 </div>
             </div>
             <div class="chart-card">
-                <h4><i class="fas fa-trend-up"></i> Evolução Mensal</h4>
+                <h4><i class="fas fa-chart-bar"></i> Tipo de Atendimento</h4>
                 <div class="chart-container">
-                    <canvas id="chartEvolucaoMes"></canvas>
+                    <canvas id="chartTipoAtendimentoMes"></canvas>
                 </div>
             </div>
         </div>
@@ -858,7 +885,7 @@
         </div>
     </div>
 
-    <!-- Painel de Controle de Atendimentos - VINCULADO À PLANILHA -->
+    <!-- Painel de Controle de Atendimentos -->
     <div id="controle-atendimentos" class="dashboard">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -961,15 +988,15 @@
         <!-- Gráficos de Atendimentos -->
         <div class="charts-container">
             <div class="chart-card">
-                <h4><i class="fas fa-chart-bar"></i> Atendimentos por Tipo</h4>
+                <h4><i class="fas fa-chart-pie"></i> Atendimentos por Diretoria</h4>
                 <div class="chart-container">
-                    <canvas id="chartTiposAtendimento"></canvas>
+                    <canvas id="chartDiretoriaAtendimentos"></canvas>
                 </div>
             </div>
             <div class="chart-card">
-                <h4><i class="fas fa-chart-line"></i> Evolução Diária</h4>
+                <h4><i class="fas fa-chart-bar"></i> Atendimentos por Tipo</h4>
                 <div class="chart-container">
-                    <canvas id="chartEvolucaoDiaria"></canvas>
+                    <canvas id="chartTipoAtendimentos"></canvas>
                 </div>
             </div>
         </div>
@@ -998,8 +1025,8 @@
                     </thead>
                     <tbody id="tabelaAtendimentos">
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">
-                                Carregando dados da planilha...
+                            <td colspan="5" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Carregando dados da planilha...
                             </td>
                         </tr>
                     </tbody>
@@ -1021,7 +1048,7 @@
         </div>
     </div>
 
-    <!-- Pipeline de Tratativas - ATUALIZADO COM OS DADOS CORRETOS -->
+    <!-- Pipeline de Tratativas - ATUALIZADO -->
     <div id="tratativas" class="dashboard">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -1034,40 +1061,36 @@
         <div class="timeline-container">
             <div class="timeline-card" style="width: 320px;">
                 <h4><i class="fas fa-check-circle" style="color: #10b981;"></i> Unidades Vendidas (13)</h4>
-                <p style="font-weight: bold; color: #10b981; margin-bottom: 15px;">VGV VENDIDO: R$ 149.152.430,00</p>
+                <p style="font-weight: bold; color: #10b981; margin-bottom: 15px;">VGV VENDIDO: R$ 149.998.088,00</p>
 
                 <div class="list-group">
-                    <h5><i class="fas fa-store-alt" style="color: #6366f1;"></i> **STORE**</h5>
+                    <h5><i class="fas fa-store-alt" style="color: #6366f1;"></i> STORE</h5>
                     <ul>
                         <li class="tratativa-item">91 Jardins - Store - Vez</li>
-                        <li class="tratativa-item">62 Europa - ONLINE</li>
-                        <li class="tratativa-item">51 Europa - CARTEIRA</li>
-                        <li class="tratativa-item">71 Jardins - VEZ</li>
-                        <li class="tratativa-item">41 Europa – CARTEIRA</li>
+                        <li class="tratativa-item" data-tooltip="GUSTAVO STORE - Cliente comprou na abertura do Stand">62 Europa - ONLINE</li>
+                        <li class="tratativa-item" data-tooltip="GUSTAVO STORE - Cliente investidor, comprou a vista">51 Europa - CARTEIRA</li>
+                        <li class="tratativa-item" data-tooltip="ANANIAS STORE - Cliente de Vez">71 Jardins - VEZ</li>
+                        <li class="tratativa-item" data-tooltip="GUSTAVO STORE - CEO Claro">41 Europa – CARTEIRA</li>
                     </ul>
                 </div>
                 <div class="list-group">
-                    <h5><i class="fas fa-home" style="color: #6366f1;"></i> **HOMESPHERE**</h5>
+                    <h5><i class="fas fa-home" style="color: #6366f1;"></i> HOMESPHERE</h5>
                     <ul>
-                        <li class="tratativa-item">121 Jardins - ONLINE</li>
-                        <li class="tratativa-item">111 Parque - CARTEIRA</li>
-                        <li class="tratativa-item">101 Europa - ONLINE (meia venda)</li>
+                        <li class="tratativa-item" data-tooltip="Venda nova da Homesphere - R$ 14.950.000">121 Jardins - ONLINE</li>
+                        <li class="tratativa-item" data-tooltip="Cliente investidor. Carteira da Homesphere">111 Parque - CARTEIRA</li>
+                        <li class="tratativa-item" data-tooltip="Venda compartilhada entre HOMESPHERE e PARCERIAS. 50% cada">101 Europa - ONLINE (meia venda)</li>
                     </ul>
                 </div>
                 <div class="list-group">
-                    <h5><i class="fas fa-handshake" style="color: #f59e0b;"></i> **PARCERIAS**</h5>
+                    <h5><i class="fas fa-handshake" style="color: #f59e0b;"></i> PARCERIAS</h5>
                     <ul>
-                        <li class="tratativa-item">101 Europa - ONLINE (meia venda)</li>
-                        <li class="tratativa-item">81 Jardins – Carteira</li>
+                        <li class="tratativa-item" data-tooltip="Venda direta Parcerias">81 Europa - CARTEIRA</li>
                     </ul>
                 </div>
                 <div class="list-group">
-                    <h5><i class="fas fa-building" style="color: #8b5cf6;"></i> **DIRETA**</h5>
+                    <h5><i class="fas fa-building" style="color: #8b5cf6;"></i> DIRETORIA</h5>
                     <ul>
-                        <li class="tratativa-item">81 Europa</li>
-                        <li class="tratativa-item">81 Parque</li>
-                        <li class="tratativa-item">131 Parque</li>
-                        <li class="tratativa-item">121 Parque</li>
+                        <li class="tratativa-item" data-tooltip="Venda direta Diretoria">131 Jardins - CARTEIRA</li>
                     </ul>
                 </div>
             </div>
@@ -1098,18 +1121,176 @@
 </div>
 
 <script>
-    // Dados da planilha
+    // Dados globais
     let atendimentosData = [];
     let atendimentosFiltrados = [];
     let filtrosAtivos = {};
     let paginaAtual = 1;
     const itensPorPagina = 10;
 
-    // URL da planilha (formato CSV)
-    const PLANILHA_URL = 'https://docs.google.com/spreadsheets/d/1oRzIpl_SH4-veIiPFqLid-fyxuPTUc2uvd3uEeACw6M/export?format=csv&gid=0';
+    // Função PRINCIPAL para carregar dados da planilha - OTIMIZADA PARA GITHUB PAGES
+    async function carregarDadosPlanilha() {
+        const statusArea = document.getElementById('statusArea');
+        statusArea.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Conectando com a planilha...</div>';
+        
+        try {
+            console.log('🔄 Iniciando carga de dados...');
+            
+            const sheetId = '1oRzIpl_SH4-veIiPFqLid-fyxuPTUc2uvd3uEeACw6M';
+            
+            // MÉTODO 1: CORS Proxy (funciona no GitHub Pages)
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+            const url = proxyUrl + encodeURIComponent(sheetUrl);
+            
+            console.log('📋 Tentando URL:', url);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            
+            const text = await response.text();
+            console.log('✅ Dados recebidos da planilha');
+            
+            // Processar resposta do Google Sheets
+            const jsonData = JSON.parse(text.substring(47).slice(0, -2));
+            
+            if (!jsonData.table || !jsonData.table.rows) {
+                throw new Error('Estrutura de dados não encontrada na planilha');
+            }
+            
+            // Extrair dados das linhas
+            const linhas = jsonData.table.rows.map(row => 
+                row.c.map(cell => cell?.v || '')
+            );
+            
+            console.log('📊 Total de linhas na planilha:', linhas.length);
+            
+            // Converter para o formato esperado - COLUNAS CORRETAS:
+            // A=0 (Data), F=5 (Tipo), J=9 (Corretor), K=10 (Gerente), L=11 (Empresa)
+            const dadosConvertidos = [];
+            
+            for (let i = 1; i < linhas.length; i++) {
+                const linha = linhas[i];
+                
+                // Verificar se a linha tem dados suficientes
+                if (linha.length > 11 && linha[0]) {
+                    const dados = {
+                        data: formatarDataPlanilha(linha[0]),  // Coluna A
+                        tipo: linha[5] || '',                  // Coluna F
+                        corretor: linha[9] || '',              // Coluna J
+                        gerente: linha[10] || '',              // Coluna K
+                        empresa: linha[11] || ''               // Coluna L
+                    };
+                    
+                    dadosConvertidos.push(dados);
+                }
+            }
+            
+            console.log('🎯 Dados convertidos:', dadosConvertidos.length, 'registros');
+            
+            if (dadosConvertidos.length > 0) {
+                console.log('📅 Primeiro registro:', dadosConvertidos[0]);
+            }
+            
+            atendimentosData = dadosConvertidos;
+            
+            if (atendimentosData.length === 0) {
+                statusArea.innerHTML = '<div class="error-message">⚠️ Planilha carregada mas nenhum dado de atendimento encontrado.</div>';
+                usarDadosExemplo();
+            } else {
+                statusArea.innerHTML = `<div class="success-message">✅ ${atendimentosData.length} atendimentos carregados da planilha Google Sheets</div>`;
+                aplicarFiltros();
+                inicializarGraficosAtendimentos();
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao carregar planilha:', error);
+            statusArea.innerHTML = `<div class="error-message">
+                ❌ Erro ao carregar planilha: ${error.message}
+                <br><small>Usando dados de exemplo</small>
+            </div>`;
+            usarDadosExemplo();
+        }
+    }
 
-    // Inicialização
+    // Dados de exemplo como fallback
+    function usarDadosExemplo() {
+        atendimentosData = [
+            { data: '2024-01-15', tipo: 'Vez', corretor: 'João Silva', gerente: 'Maria Santos', empresa: 'YUNY STORE' },
+            { data: '2024-01-16', tipo: 'Indicação', corretor: 'Pedro Costa', gerente: 'Ana Oliveira', empresa: 'HOMESPHERE' },
+            { data: '2024-01-17', tipo: 'Retorno', corretor: 'Carlos Lima', gerente: 'Paula Rodrigues', empresa: 'PARCERIAS' },
+            { data: '2024-01-18', tipo: 'Vez', corretor: 'Fernanda Rocha', gerente: 'Ricardo Alves', empresa: 'YUNY STORE' },
+            { data: '2024-01-19', tipo: 'Ligação', corretor: 'Roberto Santos', gerente: 'Camila Lima', empresa: 'DIRETORIA' },
+            { data: '2024-01-20', tipo: 'Indicação', corretor: 'Mariana Costa', gerente: 'Lucas Silva', empresa: 'YUNY SELL' }
+        ];
+        aplicarFiltros();
+        inicializarGraficosAtendimentos();
+    }
+
+    // Função para formatar datas da planilha
+    function formatarDataPlanilha(dataString) {
+        if (!dataString) return '';
+        
+        // Se já for Date object
+        if (dataString instanceof Date) {
+            return dataString.toISOString().split('T')[0];
+        }
+        
+        // Tentar diferentes formatos
+        if (dataString.includes('/')) {
+            const partes = dataString.split('/');
+            if (partes.length === 3) {
+                const dia = partes[0].padStart(2, '0');
+                const mes = partes[1].padStart(2, '0');
+                const ano = partes[2];
+                return `${ano}-${mes}-${dia}`;
+            }
+        }
+        
+        if (dataString.includes('-')) {
+            const partes = dataString.split('-');
+            if (partes.length === 3) {
+                if (partes[0].length === 4) {
+                    return dataString; // Já está no formato YYYY-MM-DD
+                } else {
+                    return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+                }
+            }
+        }
+        
+        return dataString;
+    }
+
+    // Sistema de abas
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Inicializando dashboard...');
+        
+        // Configurar abas
+        const tabs = document.querySelectorAll('.tab');
+        const dashboards = document.querySelectorAll('.dashboard');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const target = this.getAttribute('data-target');
+                
+                // Remover active de todas as abas
+                tabs.forEach(t => t.classList.remove('active'));
+                dashboards.forEach(d => d.classList.remove('active'));
+                
+                // Adicionar active na aba clicada
+                this.classList.add('active');
+                document.getElementById(target).classList.add('active');
+                
+                // Inicializar gráficos quando mudar de aba
+                if (target === 'resumo') inicializarGraficosSemana();
+                if (target === 'resumo-mes') inicializarGraficosMes();
+                if (target === 'controle-atendimentos') inicializarGraficosAtendimentos();
+            });
+        });
+
         // Configurar datas padrão
         const dataFim = new Date();
         const dataInicio = new Date();
@@ -1117,95 +1298,41 @@
         
         document.getElementById('filterDataInicio').value = dataInicio.toISOString().split('T')[0];
         document.getElementById('filterDataFim').value = dataFim.toISOString().split('T')[0];
-        
-        // Carregar dados da planilha
-        carregarDadosPlanilha();
-        
-        // Sistema de abas
-        const tabs = document.querySelectorAll('.tab');
-        const dashboards = document.querySelectorAll('.dashboard');
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const target = tab.dataset.target;
+        // Sistema de tooltips
+        document.addEventListener('mouseover', function(e) {
+            if (e.target.classList.contains('tratativa-item') && e.target.hasAttribute('data-tooltip')) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip show';
+                tooltip.textContent = e.target.getAttribute('data-tooltip');
+                document.body.appendChild(tooltip);
                 
-                tabs.forEach(t => t.classList.remove('active'));
-                dashboards.forEach(d => d.classList.remove('active'));
-
-                tab.classList.add('active');
-                document.getElementById(target).classList.add('active');
+                const rect = e.target.getBoundingClientRect();
+                tooltip.style.left = (rect.left + rect.width / 2 - tooltip.offsetWidth / 2) + 'px';
+                tooltip.style.top = (rect.bottom + 5) + 'px';
                 
-                // Inicializar gráficos quando mudar de aba
-                if (target === 'resumo') inicializarGraficosSemana();
-                if (target === 'resumo-mes') inicializarGraficosMes();
-            });
+                e.target._currentTooltip = tooltip;
+            }
         });
 
-        // Inicializar gráficos da semana
-        inicializarGraficosSemana();
-    });
-
-    // Carregar dados da planilha
-    async function carregarDadosPlanilha() {
-        try {
-            console.log('Carregando dados da planilha...');
-            const response = await fetch(PLANILHA_URL);
-            const csvText = await response.text();
-            
-            // Processar CSV
-            atendimentosData = processarCSV(csvText);
-            console.log('Dados carregados:', atendimentosData);
-            
-            // Aplicar filtros iniciais
-            aplicarFiltros();
-            
-        } catch (error) {
-            console.error('Erro ao carregar dados:', error);
-            // Usar dados de exemplo se der erro
-            usarDadosExemplo();
-        }
-    }
-
-    // Processar CSV
-    function processarCSV(csvText) {
-        const linhas = csvText.split('\n').filter(linha => linha.trim() !== '');
-        const dados = [];
-        
-        for (let i = 1; i < linhas.length; i++) {
-            const linha = linhas[i];
-            const campos = linha.split(',').map(campo => campo.replace(/^"|"$/g, '').trim());
-            
-            if (campos.length >= 12) {
-                const atendimento = {
-                    data: campos[0], // Coluna A
-                    tipo: campos[5], // Coluna F
-                    corretor: campos[9], // Coluna J
-                    gerente: campos[10], // Coluna K
-                    empresa: campos[11] // Coluna L
-                };
-                
-                if (atendimento.data) {
-                    dados.push(atendimento);
-                }
+        document.addEventListener('mouseout', function(e) {
+            if (e.target.classList.contains('tratativa-item') && e.target._currentTooltip) {
+                e.target._currentTooltip.remove();
+                e.target._currentTooltip = null;
             }
-        }
-        
-        return dados;
-    }
+        });
 
-    // Dados de exemplo
-    function usarDadosExemplo() {
-        atendimentosData = [
-            { data: '2025-09-01', tipo: 'Vez', corretor: 'João Silva', gerente: 'Maria Santos', empresa: 'YUNY STORE' },
-            { data: '2025-09-02', tipo: 'Indicação', corretor: 'Pedro Costa', gerente: 'Ana Oliveira', empresa: 'HOMESPHERE' },
-            { data: '2025-09-03', tipo: 'Retorno', corretor: 'Carlos Lima', gerente: 'Paula Rodrigues', empresa: 'PARCERIAS' }
-        ];
-        aplicarFiltros();
-    }
+        // Inicializar gráficos
+        inicializarGraficosSemana();
+        inicializarGraficosMes();
+
+        // Carregar dados da planilha
+        carregarDadosPlanilha();
+    });
 
     // Inicializar gráficos da semana
     function inicializarGraficosSemana() {
-        // Gráfico de pizza
+        // Gráfico de pizza - Distribuição por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaSemana').getContext('2d');
         new Chart(ctx1, {
             type: 'doughnut',
@@ -1215,28 +1342,45 @@
                     data: [10, 4, 2, 1],
                     backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444']
                 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
             }
         });
 
-        // Gráfico de linha
-        const ctx2 = document.getElementById('chartEvolucaoSemana').getContext('2d');
+        // Gráfico de barras - Tipo de Atendimento
+        const ctx2 = document.getElementById('chartTipoAtendimento').getContext('2d');
         new Chart(ctx2, {
-            type: 'line',
+            type: 'bar',
             data: {
-                labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                labels: ['Vez', 'Indicação', 'Retorno', 'Ligação'],
                 datasets: [{
-                    label: 'Visitas',
-                    data: [2, 3, 1, 4, 2, 2, 1],
-                    borderColor: '#3b82f6',
-                    tension: 0.4
+                    label: 'Quantidade',
+                    data: [15, 20, 6, 0],
+                    backgroundColor: '#3b82f6'
                 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
             }
         });
     }
 
     // Inicializar gráficos do mês
     function inicializarGraficosMes() {
-        // Gráfico de pizza
+        // Gráfico de pizza - Performance por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaMes').getContext('2d');
         new Chart(ctx1, {
             type: 'pie',
@@ -1246,61 +1390,187 @@
                     data: [30, 16, 0, 7],
                     backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444']
                 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
             }
         });
 
-        // Gráfico de barras
-        const ctx2 = document.getElementById('chartEvolucaoMes').getContext('2d');
+        // Gráfico de barras - Tipo de Atendimento Mensal
+        const ctx2 = document.getElementById('chartTipoAtendimentoMes').getContext('2d');
         new Chart(ctx2, {
             type: 'bar',
             data: {
-                labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+                labels: ['Vez', 'Indicação', 'Retorno', 'Ligação'],
                 datasets: [{
-                    label: 'Visitas',
-                    data: [15, 18, 20, 15],
-                    backgroundColor: '#3b82f6'
+                    label: 'Quantidade',
+                    data: [68, 61, 19, 0],
+                    backgroundColor: '#10b981'
                 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
             }
         });
     }
 
-    // Funções de filtro (simplificadas)
+    // Inicializar gráficos dos atendimentos
+    function inicializarGraficosAtendimentos() {
+        // Calcular dados para os gráficos baseados nos dados filtrados
+        const diretorias = ['YUNY STORE', 'HOMESPHERE', 'PARCERIAS', 'DIRETORIA', 'YUNY SELL'];
+        const tipos = ['Vez', 'Indicação', 'Retorno', 'Ligação'];
+        
+        const contagemDiretorias = diretorias.map(diretoria => 
+            atendimentosFiltrados.filter(a => a.empresa === diretoria).length
+        );
+        
+        const contagemTipos = tipos.map(tipo => 
+            atendimentosFiltrados.filter(a => a.tipo === tipo).length
+        );
+
+        // Gráfico de pizza - Atendimentos por Diretoria
+        const ctx1 = document.getElementById('chartDiretoriaAtendimentos').getContext('2d');
+        if (window.chartDiretoriaAtendimentos) {
+            window.chartDiretoriaAtendimentos.destroy();
+        }
+        window.chartDiretoriaAtendimentos = new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: diretorias,
+                datasets: [{
+                    data: contagemDiretorias,
+                    backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Gráfico de barras - Atendimentos por Tipo
+        const ctx2 = document.getElementById('chartTipoAtendimentos').getContext('2d');
+        if (window.chartTipoAtendimentos) {
+            window.chartTipoAtendimentos.destroy();
+        }
+        window.chartTipoAtendimentos = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: tipos,
+                datasets: [{
+                    label: 'Quantidade',
+                    data: contagemTipos,
+                    backgroundColor: '#3b82f6'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Funções de filtro
     function aplicarFiltros() {
         const dataInicio = document.getElementById('filterDataInicio').value;
         const dataFim = document.getElementById('filterDataFim').value;
-        const diretoria = document.getElementById('filterDiretoria').value;
-        const tipo = document.getElementById('filterTipo').value;
         
-        atendimentosFiltrados = atendimentosData.filter(atendimento => {
-            if (dataInicio && atendimento.data < dataInicio) return false;
-            if (dataFim && atendimento.data > dataFim) return false;
-            if (diretoria !== 'todas' && atendimento.empresa !== diretoria) return false;
-            if (tipo !== 'todos' && atendimento.tipo !== tipo) return false;
-            return true;
-        });
+        if (dataInicio && dataFim && dataInicio > dataFim) {
+            alert('Data de início não pode ser maior que data de fim!');
+            return;
+        }
 
+        filtrosAtivos = {
+            dataInicio: dataInicio,
+            dataFim: dataFim,
+            diretoria: document.getElementById('filterDiretoria').value,
+            tipo: document.getElementById('filterTipo').value
+        };
+        
         carregarAtendimentos();
         atualizarMetricas();
+        inicializarGraficosAtendimentos();
     }
 
     function limparFiltros() {
-        document.getElementById('filterDataInicio').value = '';
-        document.getElementById('filterDataFim').value = '';
+        const dataFim = new Date();
+        const dataInicio = new Date();
+        dataInicio.setDate(dataInicio.getDate() - 30);
+        
+        document.getElementById('filterDataInicio').value = dataInicio.toISOString().split('T')[0];
+        document.getElementById('filterDataFim').value = dataFim.toISOString().split('T')[0];
         document.getElementById('filterDiretoria').value = 'todas';
         document.getElementById('filterTipo').value = 'todos';
-        aplicarFiltros();
+        
+        filtrosAtivos = {};
+        carregarAtendimentos();
+        atualizarMetricas();
+        inicializarGraficosAtendimentos();
     }
 
     function carregarAtendimentos() {
         const tbody = document.getElementById('tabelaAtendimentos');
         tbody.innerHTML = '';
 
+        if (atendimentosData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">Nenhum dado disponível</td></tr>';
+            return;
+        }
+
+        // Aplicar filtros
+        atendimentosFiltrados = atendimentosData.filter(atendimento => {
+            if (filtrosAtivos.dataInicio && atendimento.data < filtrosAtivos.dataInicio) return false;
+            if (filtrosAtivos.dataFim && atendimento.data > filtrosAtivos.dataFim) return false;
+            if (filtrosAtivos.diretoria !== 'todas' && atendimento.empresa !== filtrosAtivos.diretoria) return false;
+            if (filtrosAtivos.tipo !== 'todos' && atendimento.tipo !== filtrosAtivos.tipo) return false;
+            return true;
+        });
+
+        // Ordenar por data (mais recente primeiro)
+        atendimentosFiltrados.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+        // Atualizar paginação
+        atualizarPaginacao();
+    }
+
+    function atualizarPaginacao() {
         const inicio = (paginaAtual - 1) * itensPorPagina;
         const fim = inicio + itensPorPagina;
         const atendimentosPagina = atendimentosFiltrados.slice(inicio, fim);
 
+        // Atualizar info
         document.getElementById('paginationInfo').textContent = 
             `Mostrando ${inicio + 1}-${Math.min(fim, atendimentosFiltrados.length)} de ${atendimentosFiltrados.length} registros`;
+
+        // Atualizar controles
+        document.getElementById('btnPrev').disabled = paginaAtual === 1;
+        document.getElementById('btnNext').disabled = fim >= atendimentosFiltrados.length;
+
+        // Preencher tabela
+        const tbody = document.getElementById('tabelaAtendimentos');
+        tbody.innerHTML = '';
 
         if (atendimentosPagina.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">Nenhum atendimento encontrado</td></tr>';
@@ -1327,20 +1597,30 @@
         }
     }
 
+    function mudarPagina(direcao) {
+        paginaAtual += direcao;
+        atualizarPaginacao();
+    }
+
     function atualizarMetricas() {
-        document.getElementById('totalAtendimentos').textContent = atendimentosFiltrados.length;
-        document.getElementById('totalStore').textContent = atendimentosFiltrados.filter(a => a.empresa === 'YUNY STORE').length;
-        document.getElementById('totalHomesphere').textContent = atendimentosFiltrados.filter(a => a.empresa === 'HOMESPHERE').length;
-        document.getElementById('totalParcerias').textContent = atendimentosFiltrados.filter(a => a.empresa === 'PARCERIAS').length;
+        const totalAtendimentos = atendimentosFiltrados.length;
+        const totalStore = atendimentosFiltrados.filter(a => a.empresa === 'YUNY STORE').length;
+        const totalHomesphere = atendimentosFiltrados.filter(a => a.empresa === 'HOMESPHERE').length;
+        const totalParcerias = atendimentosFiltrados.filter(a => a.empresa === 'PARCERIAS').length;
+
+        document.getElementById('totalAtendimentos').textContent = totalAtendimentos;
+        document.getElementById('totalStore').textContent = totalStore;
+        document.getElementById('totalHomesphere').textContent = totalHomesphere;
+        document.getElementById('totalParcerias').textContent = totalParcerias;
     }
 
     function formatarData(data) {
-        return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
-    }
-
-    function mudarPagina(direcao) {
-        paginaAtual += direcao;
-        carregarAtendimentos();
+        if (!data) return '-';
+        try {
+            return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+        } catch (e) {
+            return data;
+        }
     }
 
     function filtrarTabela() {
@@ -1359,6 +1639,11 @@
     }
 
     function exportarParaCSV() {
+        if (atendimentosFiltrados.length === 0) {
+            alert('Nenhum dado para exportar!');
+            return;
+        }
+
         const headers = ['Data', 'Tipo', 'Corretor', 'Gerente', 'Empresa'];
         const csvContent = [
             headers.join(','),
@@ -1367,14 +1652,16 @@
             )
         ].join('\n');
         
-        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'atendimentos.csv';
-        a.click();
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'atendimentos.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 </script>
-
 </body>
 </html>

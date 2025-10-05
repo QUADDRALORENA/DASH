@@ -1128,6 +1128,10 @@
     let paginaAtual = 1;
     const itensPorPagina = 10;
 
+    // Variáveis para os gráficos
+    let chartDiretoriaAtendimentos = null;
+    let chartTipoAtendimentos = null;
+
     // Função PRINCIPAL para carregar dados da planilha - OTIMIZADA PARA GITHUB PAGES
     async function carregarDadosPlanilha() {
         const statusArea = document.getElementById('statusArea');
@@ -1442,10 +1446,13 @@
 
         // Gráfico de pizza - Atendimentos por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaAtendimentos').getContext('2d');
-        if (window.chartDiretoriaAtendimentos) {
-            window.chartDiretoriaAtendimentos.destroy();
+        
+        // Destruir gráfico anterior se existir
+        if (chartDiretoriaAtendimentos) {
+            chartDiretoriaAtendimentos.destroy();
         }
-        window.chartDiretoriaAtendimentos = new Chart(ctx1, {
+        
+        chartDiretoriaAtendimentos = new Chart(ctx1, {
             type: 'doughnut',
             data: {
                 labels: diretorias,
@@ -1467,10 +1474,13 @@
 
         // Gráfico de barras - Atendimentos por Tipo
         const ctx2 = document.getElementById('chartTipoAtendimentos').getContext('2d');
-        if (window.chartTipoAtendimentos) {
-            window.chartTipoAtendimentos.destroy();
+        
+        // Destruir gráfico anterior se existir
+        if (chartTipoAtendimentos) {
+            chartTipoAtendimentos.destroy();
         }
-        window.chartTipoAtendimentos = new Chart(ctx2, {
+        
+        chartTipoAtendimentos = new Chart(ctx2, {
             type: 'bar',
             data: {
                 labels: tipos,

@@ -519,6 +519,12 @@
         .date-range .filter-group {
             flex: 1;
         }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--primary);
+        }
     </style>
 </head>
 
@@ -828,7 +834,7 @@
                 <div class="table-header">
                     <h3 class="table-title">Registro de Atendimentos</h3>
                     <div class="pagination-info" id="paginationInfo">
-                        Mostrando 0 de 0 registros
+                        Carregando dados...
                     </div>
                 </div>
                 <div class="table-responsive">
@@ -843,13 +849,17 @@
                             </tr>
                         </thead>
                         <tbody id="tabelaAtendimentos">
-                            <!-- Dados serão carregados via JavaScript -->
+                            <tr>
+                                <td colspan="5" class="loading">
+                                    <i class="fas fa-spinner fa-spin"></i> Carregando dados da planilha...
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="pagination">
                     <div class="pagination-info" id="paginationInfoBottom">
-                        Mostrando 0 de 0 registros
+                        Carregando dados...
                     </div>
                     <div class="pagination-controls">
                         <button class="pagination-btn" onclick="mudarPagina(-1)" disabled id="btnPrev">
@@ -987,40 +997,130 @@
     </div>
 
     <script>
-        // Dados da planilha convertidos para JSON (exemplo com alguns registros)
-        const atendimentosData = [
-            { data: '2025-05-19', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
-            { data: '2025-05-19', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
-            { data: '2025-05-19', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
-            { data: '2025-05-19', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
-            { data: '2025-05-22', tipo: 'Indicação', corretor: 'Thiago', gerente: 'Zambon', empresa: 'HOMESPHERE' },
-            { data: '2025-05-23', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
-            { data: '2025-05-24', tipo: 'Indicação', corretor: 'Guerra', gerente: 'Ricardo', empresa: 'PARCERIAS' },
-            { data: '2025-05-24', tipo: 'Indicação', corretor: 'Renata', gerente: 'Rodrigo', empresa: 'YUNY STORE' },
-            { data: '2025-05-24', tipo: 'Indicação', corretor: '', gerente: 'Gerente do online: Ruty', empresa: 'YUNY STORE' },
-            { data: '2025-05-24', tipo: 'Indicação', corretor: 'Castro', gerente: 'Castro', empresa: 'DIRETORIA' },
-            { data: '2025-05-24', tipo: 'Vez', corretor: 'Luiz (Diretor de vendas)', gerente: 'Luiz (Diretor de vendas)', empresa: 'YUNY STORE' },
-            { data: '2025-05-24', tipo: 'Vez', corretor: 'Luiz (Diretor de vendas)', gerente: 'Luiz (Diretor de vendas)', empresa: 'YUNY STORE' },
-            { data: '2025-05-25', tipo: 'Indicação', corretor: 'Luis', gerente: 'Luiz (Diretor de vendas)', empresa: 'YUNY STORE' },
-            { data: '2025-05-25', tipo: 'Indicação', corretor: 'Luis', gerente: 'Luiz (Diretor de vendas)', empresa: 'YUNY STORE' },
-            { data: '2025-05-25', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
-            { data: '2025-05-26', tipo: 'Vez', corretor: 'sem atendimento', gerente: '', empresa: 'YUNY STORE' },
-            { data: '2025-05-27', tipo: 'Indicação', corretor: 'YUNY HOME', gerente: '', empresa: 'HOMESPHERE' },
-            { data: '2025-05-27', tipo: 'Indicação', corretor: 'YUNY HOME', gerente: '', empresa: 'HOMESPHERE' },
-            { data: '2025-05-30', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
-            { data: '2025-05-31', tipo: 'Indicação', corretor: 'Bortman', gerente: 'Turra', empresa: 'YUNY STORE' },
-            { data: '2025-05-31', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
-            { data: '2025-05-31', tipo: 'Vez', corretor: 'Vanessa', gerente: 'Home', empresa: 'HOMESPHERE' },
-            { data: '2025-05-31', tipo: 'Vez', corretor: '', gerente: '', empresa: 'YUNY STORE' },
-            { data: '2025-05-31', tipo: 'Vez', corretor: 'Riko', gerente: 'Ruty', empresa: 'YUNY STORE' },
-            { data: '2025-05-31', tipo: 'Vez', corretor: 'Leon', gerente: 'Carriel', empresa: 'YUNY STORE' },
-            // Adicione aqui todos os outros dados da sua planilha seguindo o mesmo padrão
-        ];
-
-        let atendimentosFiltrados = [...atendimentosData];
+        // Variável global para armazenar os dados da planilha
+        let atendimentosData = [];
+        let atendimentosFiltrados = [];
         let filtrosAtivos = {};
         let paginaAtual = 1;
         const itensPorPagina = 10;
+
+        // Função para buscar dados da planilha do Google Sheets
+        async function buscarDadosPlanilha() {
+            try {
+                const sheetId = '1oRzIpl_SH4-veIiPFqLid-fyxuPTUc2uvd3uEeACw6M';
+                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+                
+                console.log('🔍 Iniciando busca da planilha...');
+                console.log('📋 URL:', url);
+                
+                const response = await fetch(url);
+                
+                console.log('📡 Status da resposta:', response.status);
+                console.log('✅ Resposta OK:', response.ok);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
+                const text = await response.text();
+                console.log('📄 Texto recebido (primeiros 500 caracteres):', text.substring(0, 500));
+                
+                // Verificar se a resposta contém dados
+                if (!text.includes('google.visualization.Query.setResponse')) {
+                    throw new Error('Resposta não contém dados esperados do Google Sheets');
+                }
+                
+                const json = JSON.parse(text.substring(47).slice(0, -2));
+                console.log('📊 Estrutura do JSON recebida');
+                
+                // Verificar se temos dados na planilha
+                if (!json.table || !json.table.rows) {
+                    console.warn('⚠️ Planilha não contém dados ou estrutura diferente do esperado');
+                    return [];
+                }
+                
+                const linhas = json.table.rows.map(row => 
+                    row.c.map(cell => cell?.v || '')
+                );
+                
+                console.log('📈 Total de linhas processadas:', linhas.length);
+                console.log('🔍 Primeiras 2 linhas com todas as colunas:', linhas.slice(0, 2));
+                
+                // A primeira linha são os cabeçalhos, vamos pular
+                // AGORA COM AS COLUNAS CORRETAS:
+                // A = Data (0), F = Tipo de Visita (5), J = Corretor (9), K = Gerente (10), L = Empresa (11)
+                const dadosConvertidos = linhas.slice(1).map((linha, index) => {
+                    const dados = {
+                        data: formatarDataPlanilha(linha[0]),  // Coluna A (0) - Data
+                        tipo: linha[5] || '',                  // Coluna F (5) - Tipo de Visita
+                        corretor: linha[9] || '',              // Coluna J (9) - Corretor
+                        gerente: linha[10] || '',              // Coluna K (10) - Gerente
+                        empresa: linha[11] || ''               // Coluna L (11) - Empresa
+                    };
+                    
+                    if (index < 3) {
+                        console.log(`📋 Exemplo linha ${index + 1}:`, dados);
+                    }
+                    return dados;
+                }).filter(item => item.data); // Filtrar linhas vazias
+                
+                console.log('🎯 Dados convertidos:', dadosConvertidos.length, 'registros');
+                console.log('📅 Primeiros 3 registros:', dadosConvertidos.slice(0, 3));
+                
+                return dadosConvertidos;
+                
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados da planilha:', error);
+                alert('Erro ao carregar dados da planilha. Verifique o console (F12) para detalhes.');
+                return [];
+            }
+        }
+
+        // Função para formatar datas da planilha
+        function formatarDataPlanilha(dataString) {
+            if (!dataString) return '';
+            
+            // Se já estiver no formato YYYY-MM-DD, retorna como está
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dataString)) {
+                return dataString;
+            }
+            
+            // Tenta converter de DD/MM/YYYY para YYYY-MM-DD
+            if (dataString.includes('/')) {
+                const partes = dataString.split('/');
+                if (partes.length === 3) {
+                    return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+                }
+            }
+            
+            // Tenta converter de DD-MM-YYYY para YYYY-MM-DD
+            if (dataString.includes('-')) {
+                const partes = dataString.split('-');
+                if (partes.length === 3) {
+                    // Verificar se é DD-MM-YYYY ou YYYY-MM-DD
+                    if (partes[0].length === 4) {
+                        return dataString; // Já está no formato YYYY-MM-DD
+                    } else {
+                        return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+                    }
+                }
+            }
+            
+            return dataString;
+        }
+
+        // Função para inicializar os dados
+        async function inicializarDados() {
+            console.log('🚀 Inicializando dados da planilha...');
+            
+            atendimentosData = await buscarDadosPlanilha();
+            
+            console.log('✅ Dados carregados na memória:', atendimentosData.length, 'registros');
+            
+            // Inicializar filtros e tabela
+            aplicarFiltros();
+            atualizarMetricas();
+        }
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
@@ -1032,7 +1132,8 @@
             document.getElementById('filterDataInicio').value = dataInicio.toISOString().split('T')[0];
             document.getElementById('filterDataFim').value = dataFim.toISOString().split('T')[0];
             
-            aplicarFiltros();
+            // Inicializar dados da planilha
+            inicializarDados();
             
             // Sistema de abas
             const tabs = document.querySelectorAll('.tab');
@@ -1147,6 +1248,16 @@
         function carregarAtendimentos() {
             const tbody = document.getElementById('tabelaAtendimentos');
             tbody.innerHTML = '';
+
+            // Verificar se os dados foram carregados
+            if (atendimentosData.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando dados da planilha...
+                </td>`;
+                tbody.appendChild(tr);
+                return;
+            }
 
             // Aplicar filtros
             atendimentosFiltrados = atendimentosData.filter(atendimento => {

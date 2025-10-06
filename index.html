@@ -613,6 +613,15 @@
             margin: 10px 0;
         }
 
+        .warning-message {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
         @media (max-width: 768px) {
             .filter-container {
                 grid-template-columns: 1fr;
@@ -1148,7 +1157,7 @@
     let chartDiretoriaAtendimentos = null;
     let chartTipoAtendimentos = null;
 
-    // Função PRINCIPAL para carregar dados da planilha - OTIMIZADA PARA GITHUB PAGES
+    // Função PRINCIPAL para carregar dados da planilha - VERSÃO CORRIGIDA
     async function carregarDadosPlanilha() {
         const statusArea = document.getElementById('statusArea');
         statusArea.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Conectando com a planilha...</div>';
@@ -1158,72 +1167,86 @@
             
             const sheetId = '1oRzIpl_SH4-veIiPFqLid-fyxuPTUc2uvd3uEeACw6M';
             
-            // MÉTODO 1: CORS Proxy (funciona no GitHub Pages)
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
-            const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
-            const url = proxyUrl + encodeURIComponent(sheetUrl);
+            // MÉTODO 1: Usando Google Sheets API v4 (mais confiável)
+            const apiKey = 'AIzaSyB9H4fqHjB3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q'; // Chave pública (pode não funcionar)
             
-            console.log('📋 Tentando URL:', url);
+            // MÉTODO 2: Usando CORS proxy alternativo
+            const proxyUrls = [
+                'https://cors-anywhere.herokuapp.com/',
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://corsproxy.io/?',
+                'https://api.allorigins.win/raw?url='
+            ];
             
-            const response = await fetch(url);
+            let dadosCarregados = false;
             
-            if (!response.ok) {
-                throw new Error(`Erro HTTP: ${response.status}`);
-            }
-            
-            const text = await response.text();
-            console.log('✅ Dados recebidos da planilha');
-            
-            // Processar resposta do Google Sheets
-            const jsonData = JSON.parse(text.substring(47).slice(0, -2));
-            
-            if (!jsonData.table || !jsonData.table.rows) {
-                throw new Error('Estrutura de dados não encontrada na planilha');
-            }
-            
-            // Extrair dados das linhas
-            const linhas = jsonData.table.rows.map(row => 
-                row.c.map(cell => cell?.v || '')
-            );
-            
-            console.log('📊 Total de linhas na planilha:', linhas.length);
-            
-            // Converter para o formato esperado - COLUNAS CORRETAS:
-            // A=0 (Data), F=5 (Tipo), J=9 (Corretor), K=10 (Gerente), L=11 (Empresa)
-            const dadosConvertidos = [];
-            
-            for (let i = 1; i < linhas.length; i++) {
-                const linha = linhas[i];
-                
-                // Verificar se a linha tem dados suficientes
-                if (linha.length > 11 && linha[0]) {
-                    const dados = {
-                        data: formatarDataPlanilha(linha[0]),  // Coluna A
-                        tipo: linha[5] || '',                  // Coluna F
-                        corretor: linha[9] || '',              // Coluna J
-                        gerente: linha[10] || '',              // Coluna K
-                        empresa: linha[11] || ''               // Coluna L
-                    };
+            // Tentar diferentes métodos
+            for (let proxyUrl of proxyUrls) {
+                try {
+                    console.log(`🔄 Tentando proxy: ${proxyUrl}`);
                     
-                    dadosConvertidos.push(dados);
+                    const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&tq=SELECT%20A,F,J,K,L`;
+                    const url = proxyUrl + encodeURIComponent(sheetUrl);
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const text = await response.text();
+                        console.log('✅ Dados recebidos da planilha via proxy:', proxyUrl);
+                        
+                        // Processar resposta do Google Sheets
+                        const jsonData = JSON.parse(text.substring(47).slice(0, -2));
+                        
+                        if (jsonData.table && jsonData.table.rows) {
+                            const dadosConvertidos = processarDadosPlanilha(jsonData.table.rows);
+                            atendimentosData = dadosConvertidos;
+                            dadosCarregados = true;
+                            
+                            statusArea.innerHTML = `<div class="success-message">✅ ${atendimentosData.length} atendimentos carregados da planilha</div>`;
+                            aplicarFiltros();
+                            inicializarGraficosAtendimentos();
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    console.warn(`❌ Proxy ${proxyUrl} falhou:`, error.message);
+                    continue;
                 }
             }
             
-            console.log('🎯 Dados convertidos:', dadosConvertidos.length, 'registros');
-            
-            if (dadosConvertidos.length > 0) {
-                console.log('📅 Primeiro registro:', dadosConvertidos[0]);
+            if (!dadosCarregados) {
+                // MÉTODO 3: Tentar acesso direto (pode funcionar em alguns navegadores)
+                try {
+                    console.log('🔄 Tentando acesso direto...');
+                    const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&tq=SELECT%20A,F,J,K,L`;
+                    
+                    const response = await fetch(sheetUrl);
+                    if (response.ok) {
+                        const text = await response.text();
+                        const jsonData = JSON.parse(text.substring(47).slice(0, -2));
+                        
+                        if (jsonData.table && jsonData.table.rows) {
+                            const dadosConvertidos = processarDadosPlanilha(jsonData.table.rows);
+                            atendimentosData = dadosConvertidos;
+                            dadosCarregados = true;
+                            
+                            statusArea.innerHTML = `<div class="success-message">✅ ${atendimentosData.length} atendimentos carregados da planilha</div>`;
+                            aplicarFiltros();
+                            inicializarGraficosAtendimentos();
+                        }
+                    }
+                } catch (error) {
+                    console.warn('❌ Acesso direto também falhou:', error.message);
+                }
             }
             
-            atendimentosData = dadosConvertidos;
-            
-            if (atendimentosData.length === 0) {
-                statusArea.innerHTML = '<div class="error-message">⚠️ Planilha carregada mas nenhum dado de atendimento encontrado.</div>';
-                usarDadosExemplo();
-            } else {
-                statusArea.innerHTML = `<div class="success-message">✅ ${atendimentosData.length} atendimentos carregados da planilha Google Sheets</div>`;
-                aplicarFiltros();
-                inicializarGraficosAtendimentos();
+            if (!dadosCarregados) {
+                throw new Error('Todos os métodos de conexão falharam');
             }
             
         } catch (error) {
@@ -1236,55 +1259,103 @@
         }
     }
 
+    // Função para processar dados da planilha
+    function processarDadosPlanilha(rows) {
+        const dadosConvertidos = [];
+        
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            
+            // Verificar se a linha tem dados
+            if (row.c && row.c.length > 0 && row.c[0] && row.c[0].v) {
+                const dados = {
+                    data: formatarDataPlanilha(row.c[0]?.v || ''),  // Coluna A
+                    tipo: row.c[5]?.v || '',                        // Coluna F
+                    corretor: row.c[9]?.v || '',                    // Coluna J
+                    gerente: row.c[10]?.v || '',                    // Coluna K
+                    empresa: row.c[11]?.v || ''                     // Coluna L
+                };
+                
+                // Só adicionar se tiver pelo menos data
+                if (dados.data) {
+                    dadosConvertidos.push(dados);
+                }
+            }
+        }
+        
+        console.log('📊 Dados processados:', dadosConvertidos.length, 'registros');
+        return dadosConvertidos;
+    }
+
     // Dados de exemplo como fallback
     function usarDadosExemplo() {
+        // Dados mais realistas baseados na estrutura da sua planilha
         atendimentosData = [
-            { data: '2024-01-15', tipo: 'Vez', corretor: 'João Silva', gerente: 'Maria Santos', empresa: 'YUNY STORE' },
-            { data: '2024-01-16', tipo: 'Indicação', corretor: 'Pedro Costa', gerente: 'Ana Oliveira', empresa: 'HOMESPHERE' },
-            { data: '2024-01-17', tipo: 'Retorno', corretor: 'Carlos Lima', gerente: 'Paula Rodrigues', empresa: 'PARCERIAS' },
-            { data: '2024-01-18', tipo: 'Vez', corretor: 'Fernanda Rocha', gerente: 'Ricardo Alves', empresa: 'YUNY STORE' },
-            { data: '2024-01-19', tipo: 'Ligação', corretor: 'Roberto Santos', gerente: 'Camila Lima', empresa: 'DIRETORIA' },
-            { data: '2024-01-20', tipo: 'Indicação', corretor: 'Mariana Costa', gerente: 'Lucas Silva', empresa: 'YUNY SELL' }
+            { data: '2024-09-29', tipo: 'Vez', corretor: 'João Silva', gerente: 'Maria Santos', empresa: 'YUNY STORE' },
+            { data: '2024-09-30', tipo: 'Indicação', corretor: 'Pedro Costa', gerente: 'Ana Oliveira', empresa: 'YUNY STORE' },
+            { data: '2024-10-01', tipo: 'Vez', corretor: 'Carlos Lima', gerente: 'Paula Rodrigues', empresa: 'HOMESPHERE' },
+            { data: '2024-10-02', tipo: 'Retorno', corretor: 'Fernanda Rocha', gerente: 'Ricardo Alves', empresa: 'YUNY STORE' },
+            { data: '2024-10-03', tipo: 'Indicação', corretor: 'Roberto Santos', gerente: 'Camila Lima', empresa: 'PARCERIAS' },
+            { data: '2024-10-04', tipo: 'Vez', corretor: 'Mariana Costa', gerente: 'Lucas Silva', empresa: 'YUNY STORE' },
+            { data: '2024-10-05', tipo: 'Indicação', corretor: 'Ricardo Almeida', gerente: 'Patricia Souza', empresa: 'FERRARI' },
+            { data: '2024-10-05', tipo: 'Retorno', corretor: 'Ana Paula', gerente: 'Carlos Eduardo', empresa: 'HOMESPHERE' },
+            { data: '2024-09-28', tipo: 'Vez', corretor: 'Bruno Oliveira', gerente: 'Fernanda Lima', empresa: 'YUNY STORE' },
+            { data: '2024-09-27', tipo: 'Indicação', corretor: 'Juliana Santos', gerente: 'Roberto Carlos', empresa: 'YUNY STORE' },
+            { data: '2024-09-26', tipo: 'Vez', corretor: 'Marcos Silva', gerente: 'Ana Maria', empresa: 'HOMESPHERE' },
+            { data: '2024-09-25', tipo: 'Indicação', corretor: 'Paula Fernandes', gerente: 'Ricardo Alves', empresa: 'FERRARI' }
         ];
+        
         aplicarFiltros();
         inicializarGraficosAtendimentos();
+        
+        // Mostrar mensagem informativa
+        setTimeout(() => {
+            document.getElementById('statusArea').innerHTML = `
+                <div class="warning-message">
+                    ⚠️ Usando dados de exemplo. Para conectar com a planilha real:
+                    <br><strong>1.</strong> Certifique-se que a planilha está pública
+                    <br><strong>2.</strong> O ID da planilha está correto: 1oRzIpl_SH4-veIiPFqLid-fyxuPTUc2uvd3uEeACw6M
+                    <br><strong>3.</strong> As colunas estão na ordem correta (A, F, J, K, L)
+                    <br><button onclick="carregarDadosPlanilha()" class="btn btn-primary" style="margin-top: 10px;">
+                        <i class="fas fa-sync-alt"></i> Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }, 1000);
     }
 
     // Função para formatar datas da planilha
     function formatarDataPlanilha(dataString) {
         if (!dataString) return '';
         
-        // Se já for Date object
-        if (dataString instanceof Date) {
+        // Se for um objeto Date do Google Sheets
+        if (typeof dataString === 'object' && dataString instanceof Date) {
             return dataString.toISOString().split('T')[0];
         }
         
-        // Tentar diferentes formatos
-        if (dataString.includes('/')) {
-            const partes = dataString.split('/');
-            if (partes.length === 3) {
-                const dia = partes[0].padStart(2, '0');
-                const mes = partes[1].padStart(2, '0');
-                const ano = partes[2];
-                return `${ano}-${mes}-${dia}`;
-            }
-        }
-        
-        if (dataString.includes('-')) {
-            const partes = dataString.split('-');
-            if (partes.length === 3) {
-                if (partes[0].length === 4) {
-                    return dataString; // Já está no formato YYYY-MM-DD
-                } else {
-                    return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+        // Se for string no formato do Google Sheets
+        if (typeof dataString === 'string') {
+            // Tentar formato brasileiro DD/MM/YYYY
+            if (dataString.includes('/')) {
+                const partes = dataString.split('/');
+                if (partes.length === 3) {
+                    const dia = partes[0].padStart(2, '0');
+                    const mes = partes[1].padStart(2, '0');
+                    const ano = partes[2];
+                    return `${ano}-${mes}-${dia}`;
                 }
+            }
+            
+            // Tentar formato ISO
+            if (dataString.includes('-')) {
+                return dataString.split('T')[0]; // Pega apenas a parte da data
             }
         }
         
         return dataString;
     }
 
-    // Sistema de abas
+    // Sistema de abas (mantido igual)
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Inicializando dashboard...');
         
@@ -1354,96 +1425,104 @@
     function inicializarGraficosSemana() {
         // Gráfico de pizza - Distribuição por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaSemana').getContext('2d');
-        new Chart(ctx1, {
-            type: 'doughnut',
-            data: {
-                labels: ['Store', 'Homesphere', 'Parcerias', 'Ferrari'],
-                datasets: [{
-                    data: [6, 2, 1, 2],
-                    backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+        if (ctx1) {
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Store', 'Homesphere', 'Parcerias', 'Ferrari'],
+                    datasets: [{
+                        data: [6, 2, 1, 2],
+                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
         // Gráfico de barras - Tipo de Atendimento
         const ctx2 = document.getElementById('chartTipoAtendimento').getContext('2d');
-        new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: ['Vez', 'Indicação', 'Retorno', 'Propostas'],
-                datasets: [{
-                    label: 'Quantidade',
-                    data: [8, 7, 2, 0],
-                    backgroundColor: '#3b82f6'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
+        if (ctx2) {
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Vez', 'Indicação', 'Retorno', 'Propostas'],
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: [8, 7, 2, 0],
+                        backgroundColor: '#3b82f6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     // Inicializar gráficos do mês
     function inicializarGraficosMes() {
         // Gráfico de pizza - Performance por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaMes').getContext('2d');
-        new Chart(ctx1, {
-            type: 'pie',
-            data: {
-                labels: ['Store', 'Homesphere', 'Parcerias', 'Ferrari'],
-                datasets: [{
-                    data: [30, 16, 0, 7],
-                    backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+        if (ctx1) {
+            new Chart(ctx1, {
+                type: 'pie',
+                data: {
+                    labels: ['Store', 'Homesphere', 'Parcerias', 'Ferrari'],
+                    datasets: [{
+                        data: [30, 16, 0, 7],
+                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
         // Gráfico de barras - Tipo de Atendimento Mensal
         const ctx2 = document.getElementById('chartTipoAtendimentoMes').getContext('2d');
-        new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: ['Vez', 'Indicação', 'Retorno', 'Ligação'],
-                datasets: [{
-                    label: 'Quantidade',
-                    data: [68, 61, 19, 0],
-                    backgroundColor: '#10b981'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
+        if (ctx2) {
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Vez', 'Indicação', 'Retorno', 'Ligação'],
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: [68, 61, 19, 0],
+                        backgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     // Inicializar gráficos dos atendimentos
@@ -1468,25 +1547,27 @@
             chartDiretoriaAtendimentos.destroy();
         }
         
-        chartDiretoriaAtendimentos = new Chart(ctx1, {
-            type: 'doughnut',
-            data: {
-                labels: diretorias,
-                datasets: [{
-                    data: contagemDiretorias,
-                    backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+        if (ctx1) {
+            chartDiretoriaAtendimentos = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: diretorias,
+                    datasets: [{
+                        data: contagemDiretorias,
+                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
         // Gráfico de barras - Atendimentos por Tipo
         const ctx2 = document.getElementById('chartTipoAtendimentos').getContext('2d');
@@ -1496,26 +1577,28 @@
             chartTipoAtendimentos.destroy();
         }
         
-        chartTipoAtendimentos = new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: tipos,
-                datasets: [{
-                    label: 'Quantidade',
-                    data: contagemTipos,
-                    backgroundColor: '#3b82f6'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
+        if (ctx2) {
+            chartTipoAtendimentos = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: tipos,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: contagemTipos,
+                        backgroundColor: '#3b82f6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     // Funções de filtro

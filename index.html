@@ -666,14 +666,14 @@
     <!-- Área de Status -->
     <div id="statusArea"></div>
 
-    <!-- Resumo da Semana -->
+    <!-- Resumo da Semana - ATUALIZADO -->
     <div id="resumo" class="dashboard active">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
                 <i class="fas fa-bullhorn" style="color: #f59e0b;"></i>
                 Resumo da Semana
             </h1>
-            <p class="dashboard-subtitle">Panorama de 22/09/25 a 28/09/25</p>
+            <p class="dashboard-subtitle">Panorama de 29/09/25 a 05/10/25</p>
         </div>
 
         <div class="metrics-grid">
@@ -684,8 +684,8 @@
                 </div>
                 <div class="metric-content">
                     <p>Total de visitas:</p>
-                    <strong>15</strong>
-                    <p class="info-text">Store: 10 / Homesphere: 4 / Ferrari: 1</p>
+                    <strong>8</strong>
+                    <p class="info-text">Store: 6 / Homesphere: 2 / Ferrari: 0</p>
                 </div>
             </div>
             <div class="metric-card">
@@ -695,8 +695,8 @@
                 </div>
                 <div class="metric-content">
                     <p>Total de indicações:</p>
-                    <strong>20</strong>
-                    <p class="info-text">Store: 8 / Homesphere: 7 / Parcerias: 2 / Ferrari: 1</p>
+                    <strong>7</strong>
+                    <p class="info-text">Store: 4 / Homesphere: 0 / Parcerias: 1 / Ferrari: 2</p>
                 </div>
             </div>
             <div class="metric-card">
@@ -706,8 +706,8 @@
                 </div>
                 <div class="metric-content">
                     <p>Retornos na semana:</p>
-                    <strong>6</strong>
-                    <p class="info-text">Store: 2 / Homesphere: 1 / Parcerias: 3</p>
+                    <strong>2</strong>
+                    <p class="info-text">Store: 1 / Homesphere: 1 / Parcerias: 0</p>
                 </div>
             </div>
             <div class="metric-card">
@@ -717,8 +717,7 @@
                 </div>
                 <div class="metric-content">
                     <p>Propostas geradas:</p>
-                    <strong>6</strong>
-                    <p class="info-text">Store: 3 / Parcerias: 1 / Ferrari: 2</p>
+                    <strong>0</strong>
                 </div>
             </div>
         </div>
@@ -744,24 +743,28 @@
             <div class="timeline-card">
                 <h4><i class="fas fa-map-marked-alt"></i> Visitas</h4>
                 <h5>Origem das Visitas</h5>
-                <p style="margin-bottom: 10px;">Vez: 15 atendimentos</p>
+                <p style="margin-bottom: 10px;">Vez: 8 atendimentos</p>
                 <ul>
-                    <li>Site → 1</li>
-                    <li>Placa → 1</li>
-                    <li>Vizinho → 5</li>
                     <li>Passagem → 4</li>
-                    <li>Evento Influencers → 4</li>
+                    <li>Vizinho → 2</li>
+                    <li>Instagram → 1</li>
+                    <li>Jogo na quadra → 1</li>
                 </ul>
             </div>
             <div class="timeline-card">
                 <h4><i class="fas fa-user-check"></i> Indicações</h4>
                 <h5>Origem das Indicações</h5>
                 <ul>
-                    <li>Carteira → 7</li>
-                    <li>Carteira (Parcerias) → 3</li>
-                    <li>Lead Online → 6</li>
-                    <li>Ponto de Captação → 2</li>
-                    <li>Ind Amigo → 2</li>
+                    <li>Carteira → 3</li>
+                    <li>Folheto em rua → 3</li>
+                    <li>Anúncio pago pelo corretor → 1</li>
+                </ul>
+            </div>
+            <div class="timeline-card">
+                <h4><i class="fas fa-reply"></i> Retornos</h4>
+                <h5>Origem dos Retornos</h5>
+                <ul>
+                    <li>Retorno → 2</li>
                 </ul>
             </div>
         </div>
@@ -1048,7 +1051,7 @@
         </div>
     </div>
 
-    <!-- Pipeline de Tratativas - ATUALIZADO -->
+    <!-- Pipeline de Tratativas -->
     <div id="tratativas" class="dashboard">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -1347,7 +1350,7 @@
         carregarDadosPlanilha();
     });
 
-    // Inicializar gráficos da semana
+    // Inicializar gráficos da semana - ATUALIZADO
     function inicializarGraficosSemana() {
         // Gráfico de pizza - Distribuição por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaSemana').getContext('2d');
@@ -1356,7 +1359,7 @@
             data: {
                 labels: ['Store', 'Homesphere', 'Parcerias', 'Ferrari'],
                 datasets: [{
-                    data: [10, 4, 2, 1],
+                    data: [6, 2, 1, 2],
                     backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444']
                 }]
             },
@@ -1376,10 +1379,10 @@
         new Chart(ctx2, {
             type: 'bar',
             data: {
-                labels: ['Vez', 'Indicação', 'Retorno', 'Ligação'],
+                labels: ['Vez', 'Indicação', 'Retorno', 'Propostas'],
                 datasets: [{
                     label: 'Quantidade',
-                    data: [15, 20, 6, 0],
+                    data: [8, 7, 2, 0],
                     backgroundColor: '#3b82f6'
                 }]
             },

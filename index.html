@@ -1494,33 +1494,51 @@
         return null;
     }
 
-    // Converte o texto CSV para um Array de Objetos JSON (Corrigido para ser mais robusto)
+    // Converte o texto CSV para um Array de Objetos JSON (CORRIGIDO: Menos rigoroso no número de colunas)
     function csvToJson(csv) {
+        // Remove linhas que são completamente em branco
         const lines = csv.split('\n').filter(line => line.trim() !== '');
-        if (lines.length === 0) return [];
+        if (lines.length <= 1) return [];
         
-        // Tentativa de detectar delimitador (vírgula ou ponto e vírgula)
-        let delimiter = lines[0].includes(';') ? ';' : ',';
+        // Deteção de Delimitador: Prioriza ';' (padrão Google Sheets BR)
+        let delimiter = lines[0].includes(';') ? ';' : ','; 
 
         // Limpa os cabeçalhos de aspas e espaços
         let headers = lines[0].split(delimiter).map(h => h.trim().replace(/"/g, ''));
 
+        // Garante que não haja cabeçalhos vazios
+        headers = headers.filter(h => h.length > 0);
+
         const result = [];
         for (let i = 1; i < lines.length; i++) {
-            // Usando uma simples divisão e assumindo que aspas internas são raras para esta aplicação
-            const currentline = lines[i].split(delimiter);
+            const line = lines[i].trim();
+            if (!line.length) continue;
+            
+            // Tenta dividir a linha com o delimitador detectado
+            const currentline = line.split(delimiter);
 
-            if (currentline && currentline.length === headers.length) {
-                const obj = {};
-                for (let j = 0; j < headers.length; j++) {
-                    let value = currentline[j] || '';
-                    value = value.trim().replace(/"/g, ''); 
-                    obj[headers[j]] = value;
+            const obj = {};
+            let isRowValid = false;
+
+            // Itera apenas sobre o número de colunas que temos no cabeçalho
+            for (let j = 0; j < headers.length; j++) {
+                // Pega o valor, ou string vazia se a coluna não existir (tolerância)
+                let value = currentline[j] || ''; 
+                
+                // Limpa as aspas (") e espaços extras
+                value = value.trim().replace(/"/g, ''); 
+                
+                obj[headers[j]] = value;
+
+                // Checa se o campo 'Data' tem conteúdo, mesmo que sejam apenas espaços antes de limpar.
+                if (headers[j] === COL_DATA && value !== '') {
+                    isRowValid = true;
                 }
-                // Adiciona o objeto se o primeiro campo (Data) não estiver vazio
-                if (Object.keys(obj).length > 0 && obj[COL_DATA] !== '') {
-                    result.push(obj);
-                }
+            }
+            
+            // A linha só é adicionada se o campo COL_DATA tiver um valor
+            if (isRowValid) {
+                result.push(obj);
             }
         }
         return result;
@@ -1547,7 +1565,7 @@
             atendimentosData = csvToJson(csvText);
 
             if (atendimentosData.length === 0) {
-                statusArea.innerHTML = `<div class="warning-message"><i class="fas fa-exclamation-triangle"></i> Planilha carregada, mas sem dados.</div>`;
+                statusArea.innerHTML = `<div class="warning-message"><i class="fas fa-exclamation-triangle"></i> Planilha carregada, mas sem dados válidos (Verifique se há dados na coluna 'Data').</div>`;
                 tabelaBody.innerHTML = `<tr><td colspan="5">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
@@ -1724,11 +1742,18 @@
         const store = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'YUNY STORE').length;
         const homesphere = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'HOMESPHERE').length;
         const parcerias = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'PARCERIAS').length;
+        // Outras diretorias que podem estar presentes mas não tem card específico:
+        const sell = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'YUNY SELL').length;
+        const diretoriaGeral = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'DIRETORIA').length;
+
 
         document.getElementById('totalAtendimentos').textContent = total;
         document.getElementById('totalStore').textContent = store;
         document.getElementById('totalHomesphere').textContent = homesphere;
         document.getElementById('totalParcerias').textContent = parcerias;
+
+        // Se quiser ver um total de todas as diretorias não especificadas:
+        // const outros = total - (store + homesphere + parcerias + sell + diretoriaGeral);
     }
 
     function inicializarGraficosAtendimentos(data = atendimentosPaginados) {

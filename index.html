@@ -1167,86 +1167,49 @@
             
             const sheetId = '1oRzIpl_SH4-veIiPFqLid-fyxuPTUc2uvd3uEeACw6M';
             
-            // MÉTODO 1: Usando Google Sheets API v4 (mais confiável)
-            const apiKey = 'AIzaSyB9H4fqHjB3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q'; // Chave pública (pode não funcionar)
+            // Usando CORS proxy
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+            const url = proxyUrl + encodeURIComponent(sheetUrl);
             
-            // MÉTODO 2: Usando CORS proxy alternativo
-            const proxyUrls = [
-                'https://cors-anywhere.herokuapp.com/',
-                'https://api.codetabs.com/v1/proxy?quest=',
-                'https://corsproxy.io/?',
-                'https://api.allorigins.win/raw?url='
-            ];
+            const response = await fetch(url);
             
-            let dadosCarregados = false;
-            
-            // Tentar diferentes métodos
-            for (let proxyUrl of proxyUrls) {
-                try {
-                    console.log(`🔄 Tentando proxy: ${proxyUrl}`);
-                    
-                    const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&tq=SELECT%20A,F,J,K,L`;
-                    const url = proxyUrl + encodeURIComponent(sheetUrl);
-                    
-                    const response = await fetch(url, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const text = await response.text();
-                        console.log('✅ Dados recebidos da planilha via proxy:', proxyUrl);
-                        
-                        // Processar resposta do Google Sheets
-                        const jsonData = JSON.parse(text.substring(47).slice(0, -2));
-                        
-                        if (jsonData.table && jsonData.table.rows) {
-                            const dadosConvertidos = processarDadosPlanilha(jsonData.table.rows);
-                            atendimentosData = dadosConvertidos;
-                            dadosCarregados = true;
-                            
-                            statusArea.innerHTML = `<div class="success-message">✅ ${atendimentosData.length} atendimentos carregados da planilha</div>`;
-                            aplicarFiltros();
-                            inicializarGraficosAtendimentos();
-                            break;
-                        }
-                    }
-                } catch (error) {
-                    console.warn(`❌ Proxy ${proxyUrl} falhou:`, error.message);
-                    continue;
-                }
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
             }
             
-            if (!dadosCarregados) {
-                // MÉTODO 3: Tentar acesso direto (pode funcionar em alguns navegadores)
-                try {
-                    console.log('🔄 Tentando acesso direto...');
-                    const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&tq=SELECT%20A,F,J,K,L`;
-                    
-                    const response = await fetch(sheetUrl);
-                    if (response.ok) {
-                        const text = await response.text();
-                        const jsonData = JSON.parse(text.substring(47).slice(0, -2));
-                        
-                        if (jsonData.table && jsonData.table.rows) {
-                            const dadosConvertidos = processarDadosPlanilha(jsonData.table.rows);
-                            atendimentosData = dadosConvertidos;
-                            dadosCarregados = true;
-                            
-                            statusArea.innerHTML = `<div class="success-message">✅ ${atendimentosData.length} atendimentos carregados da planilha</div>`;
-                            aplicarFiltros();
-                            inicializarGraficosAtendimentos();
-                        }
-                    }
-                } catch (error) {
-                    console.warn('❌ Acesso direto também falhou:', error.message);
-                }
+            const text = await response.text();
+            console.log('✅ Dados recebidos da planilha');
+            
+            // Processar resposta do Google Sheets
+            const jsonData = JSON.parse(text.substring(47).slice(0, -2));
+            
+            if (!jsonData.table || !jsonData.table.rows) {
+                throw new Error('Estrutura de dados não encontrada na planilha');
             }
             
-            if (!dadosCarregados) {
-                throw new Error('Todos os métodos de conexão falharam');
+            // MOSTRAR ESTRUTURA DA PLANILHA PARA DEBUG
+            console.log('🔍 ESTRUTURA DA PLANILHA:', jsonData.table);
+            
+            // Verificar cabeçalhos para identificar colunas
+            if (jsonData.table.cols && jsonData.table.cols.length > 0) {
+                console.log('📋 CABEÇALHOS DAS COLUNAS:');
+                jsonData.table.cols.forEach((col, index) => {
+                    console.log(`Coluna ${index} (${String.fromCharCode(65 + index)}):`, col.label);
+                });
+            }
+            
+            // Processar dados com colunas CORRETAS: A=0, F=5, J=9, K=10, L=11
+            const dadosConvertidos = processarDadosPlanilhaCorretos(jsonData.table.rows);
+            atendimentosData = dadosConvertidos;
+            
+            if (atendimentosData.length === 0) {
+                statusArea.innerHTML = '<div class="error-message">⚠️ Planilha carregada mas nenhum dado de atendimento encontrado.</div>';
+                usarDadosExemplo();
+            } else {
+                statusArea.innerHTML = `<div class="success-message">✅ ${atendimentosData.length} atendimentos carregados da planilha Google Sheets</div>`;
+                aplicarFiltros();
+                inicializarGraficosAtendimentos();
             }
             
         } catch (error) {
@@ -1259,31 +1222,66 @@
         }
     }
 
-    // Função para processar dados da planilha
-    function processarDadosPlanilha(rows) {
+    // Função para processar dados com colunas CORRETAS
+    function processarDadosPlanilhaCorretos(rows) {
         const dadosConvertidos = [];
+        
+        console.log('🎯 Processando com colunas: A=0, F=5, J=9, K=10, L=11');
         
         for (let i = 1; i < rows.length; i++) {
             const row = rows[i];
             
-            // Verificar se a linha tem dados
-            if (row.c && row.c.length > 0 && row.c[0] && row.c[0].v) {
-                const dados = {
-                    data: formatarDataPlanilha(row.c[0]?.v || ''),  // Coluna A
-                    tipo: row.c[5]?.v || '',                        // Coluna F
-                    corretor: row.c[9]?.v || '',                    // Coluna J
-                    gerente: row.c[10]?.v || '',                    // Coluna K
-                    empresa: row.c[11]?.v || ''                     // Coluna L
-                };
+            // DEBUG: Mostrar linha completa
+            if (i <= 5) { // Mostrar apenas as primeiras 5 linhas para debug
+                console.log(`📝 Linha ${i}:`, row.c ? row.c.map(cell => cell?.v || 'vazio') : 'vazia');
+            }
+            
+            if (row.c && row.c.length > 0) {
+                // COLUNAS CORRETAS: A=0, F=5, J=9, K=10, L=11
+                const dataRaw = row.c[0]?.v;  // Coluna A
+                const tipoRaw = row.c[5]?.v;  // Coluna F
+                const corretorRaw = row.c[9]?.v;  // Coluna J
+                const gerenteRaw = row.c[10]?.v; // Coluna K
+                const empresaRaw = row.c[11]?.v; // Coluna L
                 
-                // Só adicionar se tiver pelo menos data
-                if (dados.data) {
-                    dadosConvertidos.push(dados);
+                // Processar dados
+                const data = formatarDataPlanilha(dataRaw);
+                const tipo = tipoRaw || '';
+                const corretor = corretorRaw || '';
+                const gerente = gerenteRaw || '';
+                const empresa = empresaRaw || '';
+                
+                // Só adicionar se tiver pelo menos data e tipo
+                if (data && tipo) {
+                    dadosConvertidos.push({
+                        data: data,
+                        tipo: tipo,
+                        corretor: corretor,
+                        gerente: gerente,
+                        empresa: empresa
+                    });
+                    
+                    // DEBUG: Mostrar primeiros registros processados
+                    if (dadosConvertidos.length <= 3) {
+                        console.log(`✅ Registro ${dadosConvertidos.length}:`, { data, tipo, corretor, gerente, empresa });
+                    }
+                } else if (dataRaw || tipoRaw) {
+                    // DEBUG: Mostrar registros que não foram processados
+                    console.log(`❌ Dados insuficientes na linha ${i}:`, { dataRaw, tipoRaw });
                 }
             }
         }
         
-        console.log('📊 Dados processados:', dadosConvertidos.length, 'registros');
+        console.log('📊 Total de dados processados:', dadosConvertidos.length, 'registros');
+        
+        // Mostrar estatísticas dos dados
+        if (dadosConvertidos.length > 0) {
+            const tipos = [...new Set(dadosConvertidos.map(d => d.tipo))];
+            const empresas = [...new Set(dadosConvertidos.map(d => d.empresa))];
+            console.log('📈 Tipos encontrados:', tipos);
+            console.log('🏢 Empresas encontradas:', empresas);
+        }
+        
         return dadosConvertidos;
     }
 
@@ -1298,11 +1296,7 @@
             { data: '2024-10-03', tipo: 'Indicação', corretor: 'Roberto Santos', gerente: 'Camila Lima', empresa: 'PARCERIAS' },
             { data: '2024-10-04', tipo: 'Vez', corretor: 'Mariana Costa', gerente: 'Lucas Silva', empresa: 'YUNY STORE' },
             { data: '2024-10-05', tipo: 'Indicação', corretor: 'Ricardo Almeida', gerente: 'Patricia Souza', empresa: 'FERRARI' },
-            { data: '2024-10-05', tipo: 'Retorno', corretor: 'Ana Paula', gerente: 'Carlos Eduardo', empresa: 'HOMESPHERE' },
-            { data: '2024-09-28', tipo: 'Vez', corretor: 'Bruno Oliveira', gerente: 'Fernanda Lima', empresa: 'YUNY STORE' },
-            { data: '2024-09-27', tipo: 'Indicação', corretor: 'Juliana Santos', gerente: 'Roberto Carlos', empresa: 'YUNY STORE' },
-            { data: '2024-09-26', tipo: 'Vez', corretor: 'Marcos Silva', gerente: 'Ana Maria', empresa: 'HOMESPHERE' },
-            { data: '2024-09-25', tipo: 'Indicação', corretor: 'Paula Fernandes', gerente: 'Ricardo Alves', empresa: 'FERRARI' }
+            { data: '2024-10-05', tipo: 'Retorno', corretor: 'Ana Paula', gerente: 'Carlos Eduardo', empresa: 'HOMESPHERE' }
         ];
         
         aplicarFiltros();
@@ -1315,7 +1309,7 @@
                     ⚠️ Usando dados de exemplo. Para conectar com a planilha real:
                     <br><strong>1.</strong> Certifique-se que a planilha está pública
                     <br><strong>2.</strong> O ID da planilha está correto: 1oRzIpl_SH4-veIiPFqLid-fyxuPTUc2uvd3uEeACw6M
-                    <br><strong>3.</strong> As colunas estão na ordem correta (A, F, J, K, L)
+                    <br><strong>3.</strong> As colunas estão na ordem: A=Data, F=Tipo, J=Corretor, K=Gerente, L=Empresa
                     <br><button onclick="carregarDadosPlanilha()" class="btn btn-primary" style="margin-top: 10px;">
                         <i class="fas fa-sync-alt"></i> Tentar Novamente
                     </button>
@@ -1324,20 +1318,29 @@
         }, 1000);
     }
 
-    // Função para formatar datas da planilha
-    function formatarDataPlanilha(dataString) {
-        if (!dataString) return '';
+    // Função para formatar datas da planilha - VERSÃO MELHORADA
+    function formatarDataPlanilha(dataRaw) {
+        if (!dataRaw) return '';
+        
+        console.log('📅 Processando data:', dataRaw, typeof dataRaw);
         
         // Se for um objeto Date do Google Sheets
-        if (typeof dataString === 'object' && dataString instanceof Date) {
-            return dataString.toISOString().split('T')[0];
+        if (typeof dataRaw === 'object' && dataRaw instanceof Date) {
+            return dataRaw.toISOString().split('T')[0];
         }
         
-        // Se for string no formato do Google Sheets
-        if (typeof dataString === 'string') {
+        // Se for número serial do Excel/Google Sheets
+        if (typeof dataRaw === 'number') {
+            // Converter número serial para data
+            const data = new Date((dataRaw - 25569) * 86400 * 1000);
+            return data.toISOString().split('T')[0];
+        }
+        
+        // Se for string
+        if (typeof dataRaw === 'string') {
             // Tentar formato brasileiro DD/MM/YYYY
-            if (dataString.includes('/')) {
-                const partes = dataString.split('/');
+            if (dataRaw.includes('/')) {
+                const partes = dataRaw.split('/');
                 if (partes.length === 3) {
                     const dia = partes[0].padStart(2, '0');
                     const mes = partes[1].padStart(2, '0');
@@ -1346,16 +1349,34 @@
                 }
             }
             
-            // Tentar formato ISO
-            if (dataString.includes('-')) {
-                return dataString.split('T')[0]; // Pega apenas a parte da data
+            // Tentar formato brasileiro DD-MM-YYYY
+            if (dataRaw.includes('-')) {
+                const partes = dataRaw.split('-');
+                if (partes.length === 3) {
+                    // Verificar se é DD-MM-YYYY ou YYYY-MM-DD
+                    if (partes[0].length === 4) {
+                        return dataRaw; // Já está no formato YYYY-MM-DD
+                    } else {
+                        return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+                    }
+                }
+            }
+            
+            // Tentar outros formatos
+            try {
+                const data = new Date(dataRaw);
+                if (!isNaN(data.getTime())) {
+                    return data.toISOString().split('T')[0];
+                }
+            } catch (e) {
+                console.warn('❌ Não foi possível converter a data:', dataRaw);
             }
         }
         
-        return dataString;
+        return dataRaw;
     }
 
-    // Sistema de abas (mantido igual)
+    // Sistema de abas
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 Inicializando dashboard...');
         

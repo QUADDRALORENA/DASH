@@ -1,3 +1,12 @@
+Para resolver o problema do filtro, eu atualizei o bloco `<script>` do seu arquivo `index (3).html` com as seguintes correções:
+
+1.  **Nomes das Colunas Exatos:** Defini constantes com a capitalização e os espaços idênticos aos que você forneceu (`TIPO DE VISITA`, `Corretor de atendimento`, `Empresa`), o que é fundamental para o JavaScript ler corretamente o seu CSV.
+2.  **Função de Data Robusta:** Adicionei a função `parseDate` para garantir que o filtro de data funcione corretamente, mesmo que as datas na sua planilha estejam no formato brasileiro (`DD/MM/YYYY`) ou em formatos mistos.
+3.  **Lógica Completa de Filtro:** A função `aplicarFiltros` e as relacionadas foram atualizadas para usar essas novas constantes e a lógica de data, corrigindo o erro de filtro que você estava enfrentando.
+
+Abaixo está o código **`index (3).html` completo e corrigido**. Basta copiar todo o conteúdo e salvar no seu arquivo.
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1461,11 +1470,42 @@
     let chartDiretoriaAtendimentos = null;
     let chartTipoAtendimentos = null;
 
-    // URL DO SEU GOOGLE SHEETS PUBLICADO COMO CSV
-const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTokag2KDlpWxGK5V3yk3hFehgxUrVIw9vll3ES4SduXdYTLQLtKDjWQUdCvkLa3M0teXdxeEc/pub?gid=0&single=true&output=csv';    
+    // URL DO SEU GOOGLE SHEETS PUBLICADO COMO CSV (CORRIGIDO)
+    const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTokag2KDlpWxGK5V3yk3hFehgxUrVIw9vll3ES4SduXdYTLQLtKDjWQUdCvkLa3M0teXdxeEc/pub?gid=0&single=true&output=csv'; 
+    
+    // --------------------------------------------------------------------
+    // !!! IMPORTANTE: NOMES DAS COLUNAS AJUSTADOS COM BASE NO SEU FEEDBACK !!!
+    // Se o filtro AINDA FALHAR, verifique se a capitalização e os espaços 
+    // nestas 5 linhas correspondem EXATAMENTE ao seu CSV.
+    // --------------------------------------------------------------------
+    const COL_DATA = 'Data'; 
+    const COL_TIPO = 'TIPO DE VISITA'; 
+    const COL_GERENTE = 'Gerente'; 
+    const COL_CORRETOR = 'Corretor de atendimento'; 
+    const COL_DIRETORIA = 'Empresa'; 
+
     // ====================================================================
-    // 2. Funções Auxiliares de Dados (CSV para JSON)
+    // 2. Funções Auxiliares de Dados (CSV para JSON e Data Parsing)
     // ====================================================================
+
+    // Função para tratar formatos de data (DD/MM/YYYY e YYYY-MM-DD)
+    function parseDate(dateStr) {
+        if (!dateStr) return null;
+        
+        // Tenta formato DD/MM/YYYY (Padrão BR)
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+            // Constrói a data como YYYY-MM-DD (internacional) para evitar problemas de fuso
+            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
+        }
+        
+        // Tenta formato YYYY-MM-DD ou outros formatos válidos (Padrão JS)
+        if (dateStr.includes('-')) {
+             return new Date(dateStr + 'T00:00:00');
+        }
+        
+        return null;
+    }
 
     // Converte o texto CSV para um Array de Objetos JSON
     function csvToJson(csv) {
@@ -1553,23 +1593,25 @@ const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTo
         const diretoria = document.getElementById('filterDiretoria').value;
         const tipo = document.getElementById('filterTipo').value;
 
+        // Datas do filtro (convertidas para Data de Referência)
         const dataInicio = dataInicioStr ? new Date(dataInicioStr + 'T00:00:00') : null;
         const dataFim = dataFimStr ? new Date(dataFimStr + 'T23:59:59') : null;
 
         atendimentosFiltrados = atendimentosData.filter(item => {
-            // Assumindo que a coluna de data se chama 'Data' no CSV
-            const itemDate = item.Data ? new Date(item.Data + 'T00:00:00') : null;
+            // Usa a função parseDate para obter o objeto Date corretamente
+            const itemDate = parseDate(item[COL_DATA]);
 
             let passaData = true;
             if (dataInicio && itemDate && itemDate < dataInicio) passaData = false;
+            // O uso de 'T23:59:59' no dataFimStr já garante a inclusão do dia final.
             if (dataFim && itemDate && itemDate > dataFim) passaData = false;
 
-            // Tentativa de pegar o nome da diretoria de 'Diretoria' ou 'Empresa'
-            const diretoriaKey = item.Diretoria || item.Empresa || ''; 
+            // Filtro de Diretoria (case insensitive)
+            const diretoriaKey = item[COL_DIRETORIA] || ''; 
             let passaDiretoria = diretoria === 'todas' || diretoriaKey.toUpperCase() === diretoria.toUpperCase();
 
-            // Tentativa de pegar o tipo de 'Tipo de Visita' ou 'Tipo'
-            const tipoKey = item['Tipo de Visita'] || item.Tipo || ''; 
+            // Filtro de Tipo (case insensitive)
+            const tipoKey = item[COL_TIPO] || ''; 
             let passaTipo = tipo === 'todos' || tipoKey.toUpperCase() === tipo.toUpperCase();
 
             return passaData && passaDiretoria && passaTipo;
@@ -1638,12 +1680,12 @@ const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTo
             tabelaBody.innerHTML = `<tr><td colspan="5">Nenhum registro encontrado.</td></tr>`;
         } else {
             dadosPagina.forEach(item => {
-                // Mapeamento de colunas (Ajuste se os nomes do seu CSV forem diferentes!)
-                const diretoria = item.Diretoria || item.Empresa || 'N/A';
-                const tipo = item['Tipo de Visita'] || item.Tipo || 'N/A';
-                const corretor = item.Corretor || 'N/A';
-                const gerente = item.Gerente || 'N/A';
-                const dataFormatada = item.Data || 'N/A'; // Assumindo formato YYYY-MM-DD ou DD/MM/YYYY
+                // Mapeamento de colunas usando as constantes
+                const diretoria = item[COL_DIRETORIA] || 'N/A';
+                const tipo = item[COL_TIPO] || 'N/A';
+                const corretor = item[COL_CORRETOR] || 'N/A';
+                const gerente = item[COL_GERENTE] || 'N/A';
+                const dataFormatada = item[COL_DATA] || 'N/A';
 
                 // Gera a classe CSS dinamicamente para o badge
                 const diretoriaClass = 'diretoria-' + diretoria.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -1679,9 +1721,9 @@ const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTo
     function atualizarMetricas(data) {
         const total = data.length;
         // As chaves no CSV devem ser as mesmas usadas aqui (ex: 'YUNY STORE')
-        const store = data.filter(item => (item.Diretoria || item.Empresa)?.toUpperCase() === 'YUNY STORE').length;
-        const homesphere = data.filter(item => (item.Diretoria || item.Empresa)?.toUpperCase() === 'HOMESPHERE').length;
-        const parcerias = data.filter(item => (item.Diretoria || item.Empresa)?.toUpperCase() === 'PARCERIAS').length;
+        const store = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'YUNY STORE').length;
+        const homesphere = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'HOMESPHERE').length;
+        const parcerias = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'PARCERIAS').length;
 
         document.getElementById('totalAtendimentos').textContent = total;
         document.getElementById('totalStore').textContent = store;
@@ -1696,7 +1738,7 @@ const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTo
 
         const diretorias = {};
         data.forEach(item => {
-            const dir = (item.Diretoria || item.Empresa || 'Outros').toUpperCase();
+            const dir = (item[COL_DIRETORIA] || 'Outros').toUpperCase();
             diretorias[dir] = (diretorias[dir] || 0) + 1;
         });
 
@@ -1722,7 +1764,7 @@ const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTo
         
         const tipos = {};
         data.forEach(item => {
-            const tipo = (item['Tipo de Visita'] || item.Tipo || 'Outros').toUpperCase();
+            const tipo = (item[COL_TIPO] || 'Outros').toUpperCase();
             tipos[tipo] = (tipos[tipo] || 0) + 1;
         });
 
@@ -2133,3 +2175,4 @@ const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTo
 </script>
 </body>
 </html>
+```

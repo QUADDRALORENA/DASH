@@ -1461,19 +1461,15 @@
     let chartDiretoriaAtendimentos = null;
     let chartTipoAtendimentos = null;
 
-    // URL DO SEU GOOGLE SHEETS PUBLICADO COMO CSV (CORRIGIDO)
+    // URL DO SEU GOOGLE SHEETS PUBLICADO COMO CSV (MANTIDO DO SEU CÓDIGO)
     const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTokag2KDlpWxGK5V3yk3hFehgxUrVIw9vll3ES4SduXdYTLQLtKDjWQUdCvkLa3M0teXdxeEc/pub?gid=0&single=true&output=csv'; 
     
-    // --------------------------------------------------------------------
-    // !!! IMPORTANTE: NOMES DAS COLUNAS AJUSTADOS COM BASE NO SEU FEEDBACK !!!
-    // Se o filtro AINDA FALHAR, verifique se a capitalização e os espaços 
-    // nestas 5 linhas correspondem EXATAMENTE ao seu CSV.
-    // --------------------------------------------------------------------
+    // Nomes das colunas no seu arquivo CSV (Chaves dos objetos JSON)
     const COL_DATA = 'Data'; 
     const COL_TIPO = 'TIPO DE VISITA'; 
     const COL_GERENTE = 'Gerente'; 
     const COL_CORRETOR = 'Corretor de atendimento'; 
-    const COL_DIRETORIA = 'Empresa'; 
+    const COL_DIRETORIA = 'Empresa'; // Usado para o filtro Diretoria/Empresa e Gráfico Diretoria
 
     // ====================================================================
     // 2. Funções Auxiliares de Dados (CSV para JSON e Data Parsing)
@@ -1498,34 +1494,31 @@
         return null;
     }
 
-    // Converte o texto CSV para um Array de Objetos JSON
+    // Converte o texto CSV para um Array de Objetos JSON (Corrigido para ser mais robusto)
     function csvToJson(csv) {
         const lines = csv.split('\n').filter(line => line.trim() !== '');
         if (lines.length === 0) return [];
         
-        let delimiter = ';';
-        // Tenta detectar o delimitador se não for ';'
-        if (!lines[0].includes(';')) {
-            delimiter = ',';
-        }
+        // Tentativa de detectar delimitador (vírgula ou ponto e vírgula)
+        let delimiter = lines[0].includes(';') ? ';' : ',';
 
         // Limpa os cabeçalhos de aspas e espaços
         let headers = lines[0].split(delimiter).map(h => h.trim().replace(/"/g, ''));
 
         const result = [];
         for (let i = 1; i < lines.length; i++) {
-            // Expressão regular para tentar lidar com valores que contenham o delimitador entre aspas
-            const currentline = lines[i].match(new RegExp('(?:\"[^\"]*\"|[^\"\"^' + delimiter + ']*)|$', 'g')).filter(Boolean);
+            // Usando uma simples divisão e assumindo que aspas internas são raras para esta aplicação
+            const currentline = lines[i].split(delimiter);
 
-            if (currentline && currentline.length > 0) {
+            if (currentline && currentline.length === headers.length) {
                 const obj = {};
-                for (let j = 0; j < headers.length && j < currentline.length; j++) {
+                for (let j = 0; j < headers.length; j++) {
                     let value = currentline[j] || '';
                     value = value.trim().replace(/"/g, ''); 
                     obj[headers[j]] = value;
                 }
-                // Adiciona o objeto se o primeiro campo não estiver vazio
-                if (Object.keys(obj).length > 0 && obj[headers[0]] !== '') {
+                // Adiciona o objeto se o primeiro campo (Data) não estiver vazio
+                if (Object.keys(obj).length > 0 && obj[COL_DATA] !== '') {
                     result.push(obj);
                 }
             }
@@ -1573,6 +1566,17 @@
         }
     }
 
+    // Função para contar frequência (Usado nos gráficos)
+    function contarFrequencia(data, colKey) {
+        const contagem = {};
+        data.forEach(item => {
+            // Garante que o valor existe, remove espaços e converte para maiúsculas para agrupar variações
+            const valor = (item[colKey] || 'NÃO ESPECIFICADO').trim().toUpperCase(); 
+            contagem[valor] = (contagem[valor] || 0) + 1;
+        });
+        return contagem;
+    }
+
 
     // ====================================================================
     // 3. Lógica de Filtro, Busca e Paginação
@@ -1584,26 +1588,24 @@
         const diretoria = document.getElementById('filterDiretoria').value;
         const tipo = document.getElementById('filterTipo').value;
 
-        // Datas do filtro (convertidas para Data de Referência)
+        // Datas do filtro
         const dataInicio = dataInicioStr ? new Date(dataInicioStr + 'T00:00:00') : null;
         const dataFim = dataFimStr ? new Date(dataFimStr + 'T23:59:59') : null;
 
         atendimentosFiltrados = atendimentosData.filter(item => {
-            // Usa a função parseDate para obter o objeto Date corretamente
+            // Filtro de Data
             const itemDate = parseDate(item[COL_DATA]);
-
             let passaData = true;
             if (dataInicio && itemDate && itemDate < dataInicio) passaData = false;
-            // O uso de 'T23:59:59' no dataFimStr já garante a inclusão do dia final.
             if (dataFim && itemDate && itemDate > dataFim) passaData = false;
 
-            // Filtro de Diretoria (case insensitive)
-            const diretoriaKey = item[COL_DIRETORIA] || ''; 
-            let passaDiretoria = diretoria === 'todas' || diretoriaKey.toUpperCase() === diretoria.toUpperCase();
+            // Filtro de Diretoria (Empresa) - Case insensitive
+            const diretoriaKey = (item[COL_DIRETORIA] || '').trim().toUpperCase(); 
+            let passaDiretoria = diretoria === 'todas' || diretoriaKey === diretoria.toUpperCase();
 
-            // Filtro de Tipo (case insensitive)
-            const tipoKey = item[COL_TIPO] || ''; 
-            let passaTipo = tipo === 'todos' || tipoKey.toUpperCase() === tipo.toUpperCase();
+            // Filtro de Tipo (TIPO DE VISITA) - Case insensitive
+            const tipoKey = (item[COL_TIPO] || '').trim().toUpperCase(); 
+            let passaTipo = tipo === 'todos' || tipoKey === tipo.toUpperCase();
 
             return passaData && passaDiretoria && passaTipo;
         });
@@ -1638,17 +1640,25 @@
         
         // Aplica filtro de busca ao conjunto já filtrado por data/dropdowns
         atendimentosPaginados = atendimentosFiltrados.filter(item => {
-            const itemString = Object.values(item).join(' ').toLowerCase();
-            return itemString.includes(termoBusca);
+            // Busca nas colunas principais: Data, Tipo, Corretor, Gerente, Empresa
+            const itemString = (item[COL_DATA] || '') + ' ' +
+                               (item[COL_TIPO] || '') + ' ' +
+                               (item[COL_CORRETOR] || '') + ' ' +
+                               (item[COL_GERENTE] || '') + ' ' +
+                               (item[COL_DIRETORIA] || '');
+            
+            return itemString.toLowerCase().includes(termoBusca);
         });
 
         atualizarMetricas(atendimentosPaginados);
+        // Atualiza Gráficos (Requisitos 3 e 4)
         inicializarGraficosAtendimentos(atendimentosPaginados);
         
         paginaAtual = 1;
         popularTabela(atendimentosPaginados);
     }
     
+    // Popula Tabela (Requisito 2: Garante colunas corretas)
     function popularTabela(data) {
         const tabelaBody = document.getElementById('tabelaAtendimentos');
         tabelaBody.innerHTML = '';
@@ -1660,8 +1670,7 @@
         const fim = inicio + itensPorPagina;
         const dadosPagina = data.slice(inicio, fim);
         
-        if (dadosPagina.length === 0 && data.length > 0) {
-            // Caso a busca ou filtro esvazie a página, volta para a última página válida
+        if (dadosPagina.length === 0 && data.length > 0 && paginaAtual > 1) {
             paginaAtual = totalPaginas;
             popularTabela(data);
             return;
@@ -1671,7 +1680,7 @@
             tabelaBody.innerHTML = `<tr><td colspan="5">Nenhum registro encontrado.</td></tr>`;
         } else {
             dadosPagina.forEach(item => {
-                // Mapeamento de colunas usando as constantes
+                // Mapeamento de colunas usando as constantes (Garante a ordem e nomeclatura correta)
                 const diretoria = item[COL_DIRETORIA] || 'N/A';
                 const tipo = item[COL_TIPO] || 'N/A';
                 const corretor = item[COL_CORRETOR] || 'N/A';
@@ -1706,7 +1715,7 @@
     }
     
     // ====================================================================
-    // 4. Métricas e Gráficos Dinâmicos
+    // 4. Métricas e Gráficos Dinâmicos (CORRIGIDO)
     // ====================================================================
 
     function atualizarMetricas(data) {
@@ -1723,15 +1732,11 @@
     }
 
     function inicializarGraficosAtendimentos(data = atendimentosPaginados) {
-        // 1. Gráfico de Diretoria (Pie)
+        // 1. Gráfico de Diretoria (Pie) - REQUISITO 3: Usa apenas COL_DIRETORIA
         const ctx1 = document.getElementById('chartDiretoriaAtendimentos').getContext('2d');
         if (chartDiretoriaAtendimentos) chartDiretoriaAtendimentos.destroy();
 
-        const diretorias = {};
-        data.forEach(item => {
-            const dir = (item[COL_DIRETORIA] || 'Outros').toUpperCase();
-            diretorias[dir] = (diretorias[dir] || 0) + 1;
-        });
+        const diretorias = contarFrequencia(data, COL_DIRETORIA);
 
         const labels = Object.keys(diretorias);
         const chartData = Object.values(diretorias);
@@ -1749,15 +1754,11 @@
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
 
-        // 2. Gráfico de Tipo (Bar)
+        // 2. Gráfico de Tipo (Bar) - REQUISITO 4: Usa apenas COL_TIPO
         const ctx2 = document.getElementById('chartTipoAtendimentos').getContext('2d');
         if (chartTipoAtendimentos) chartTipoAtendimentos.destroy();
         
-        const tipos = {};
-        data.forEach(item => {
-            const tipo = (item[COL_TIPO] || 'Outros').toUpperCase();
-            tipos[tipo] = (tipos[tipo] || 0) + 1;
-        });
+        const tipos = contarFrequencia(data, COL_TIPO);
 
         const tipoLabels = Object.keys(tipos);
         const tipoData = Object.values(tipos);
@@ -1780,24 +1781,28 @@
     }
 
     // ====================================================================
-    // 5. Exportação
+    // 5. Exportação (CORRIGIDO) - REQUISITO 1: Exporta colunas selecionadas
     // ====================================================================
 
     function exportarParaCSV() {
+        // Colunas a serem exportadas (usando as constantes do CSV)
+        const COLUNAS_EXPORTAR = [COL_DATA, COL_TIPO, COL_CORRETOR, COL_GERENTE, COL_DIRETORIA];
+        // Cabeçalhos para o arquivo final
+        const CABECALHOS_EXPORTAR = ['Data', 'Tipo de Visita', 'Corretor', 'Gerente', 'Empresa'];
+
         if (atendimentosPaginados.length === 0) {
             alert("Não há dados filtrados para exportar.");
             return;
         }
 
-        const headers = Object.keys(atendimentosPaginados[0]);
         // Usa ; como separador e aspas para envolver valores para segurança
-        let csvContent = headers.map(h => `"${h}"`).join(";") + "\n";
+        let csvContent = CABECALHOS_EXPORTAR.map(h => `"${h}"`).join(";") + "\n";
 
         atendimentosPaginados.forEach(item => {
-            const row = headers.map(header => {
+            const row = COLUNAS_EXPORTAR.map(header => {
                 let value = item[header] || '';
-                // Limpa aspas e quebras de linha para evitar quebras no CSV
-                return `"${String(value).replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+                // Sanitiza o valor para CSV (envolve com aspas, troca ; por , e remove quebras de linha)
+                return `"${String(value).replace(/"/g, '""').replace(/;/, ',').replace(/\n/g, ' ')}"`;
             }).join(";");
             csvContent += row + "\n";
         });
@@ -1816,10 +1821,10 @@
     }
     
     // ====================================================================
-    // 6. Funções de Inicialização Estáticas (Originais do seu código)
+    // 6. Funções de Inicialização Estáticas (MANTIDAS)
     // ====================================================================
 
-    // Inicializar gráficos da semana - ATUALIZADO
+    // Inicializar gráficos da semana - MANTIDO
     function inicializarGraficosSemana() {
         // Gráfico de pizza - Distribuição por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaSemana').getContext('2d');
@@ -1871,7 +1876,7 @@
         }
     }
 
-    // Inicializar gráficos do OUTUBRO
+    // Inicializar gráficos do OUTUBRO - MANTIDO
     function inicializarGraficosOutubro() {
         // Gráfico de pizza - Performance por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaOutubro').getContext('2d');
@@ -1923,7 +1928,7 @@
         }
     }
 
-    // Inicializar gráficos do SETEMBRO
+    // Inicializar gráficos do SETEMBRO - MANTIDO
     function inicializarGraficosSetembro() {
         // Gráfico de pizza - Performance por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaSetembro').getContext('2d');
@@ -1975,7 +1980,7 @@
         }
     }
 
-    // Inicializar gráficos do Panorama Estoque - DADOS CORRETOS
+    // Inicializar gráficos do Panorama Estoque - MANTIDO
     function inicializarGraficosEstoque() {
         // Gráfico de Vendas por Torre
         const ctx1 = document.getElementById('chartVendasTorre').getContext('2d');
@@ -2093,7 +2098,7 @@
 
 
     // ====================================================================
-    // 7. Event Listener de Inicialização (Mantido do Original)
+    // 7. Event Listener de Inicialização (MANTIDO)
     // ====================================================================
 
     document.addEventListener('DOMContentLoaded', function() {

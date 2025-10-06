@@ -674,10 +674,8 @@
         </div>
     </header>
 
-    <!-- Área de Status -->
     <div id="statusArea"></div>
 
-    <!-- Resumo da Semana - ATUALIZADO -->
     <div id="resumo" class="dashboard active">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -733,7 +731,6 @@
             </div>
         </div>
 
-        <!-- Gráficos -->
         <div class="charts-container">
             <div class="chart-card">
                 <h4><i class="fas fa-chart-pie"></i> Distribuição por Diretoria</h4>
@@ -781,7 +778,6 @@
         </div>
     </div>
 
-    <!-- Resumo do Mês - OUTUBRO ATUALIZADO -->
     <div id="resumo-mes" class="dashboard">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -838,7 +834,6 @@
             </div>
         </div>
 
-        <!-- Gráficos Mensais -->
         <div class="charts-container">
             <div class="chart-card">
                 <h4><i class="fas fa-chart-pie"></i> Distribuição por Diretoria - Outubro</h4>
@@ -899,7 +894,6 @@
         </div>
     </div>
 
-    <!-- Histórico Mensal - SETEMBRO -->
     <div id="historico-mes" class="dashboard">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -956,7 +950,6 @@
             </div>
         </div>
 
-        <!-- Gráficos Mensais -->
         <div class="charts-container">
             <div class="chart-card">
                 <h4><i class="fas fa-chart-pie"></i> Distribuição por Diretoria - Setembro</h4>
@@ -1027,7 +1020,6 @@
         </div>
     </div>
 
-    <!-- PANORAMA ESTOQUE - ATUALIZADO COM DADOS CORRETOS -->
     <div id="panorama-estoque" class="dashboard">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -1037,7 +1029,6 @@
             <p class="dashboard-subtitle">Visão geral de vendas, estoque e performance - Quaddra Lorena</p>
         </div>
 
-        <!-- Performance Geral -->
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-header">
@@ -1085,7 +1076,6 @@
             </div>
         </div>
 
-        <!-- Gráficos Principais -->
         <div class="charts-container">
             <div class="chart-card">
                 <h4><i class="fas fa-chart-pie"></i> Vendas por Torre</h4>
@@ -1101,9 +1091,7 @@
             </div>
         </div>
 
-        <!-- Detalhamento Vendas e Estoque -->
         <div class="timeline-container">
-            <!-- VENDIDAS -->
             <div class="timeline-card">
                 <h4><i class="fas fa-check-circle" style="color: #10b981;"></i> UNIDADES VENDIDAS</h4>
                 <h5>Total: 15 unidades</h5>
@@ -1136,7 +1124,6 @@
                 </div>
             </div>
 
-            <!-- ESTOQUE -->
             <div class="timeline-card">
                 <h4><i class="fas fa-warehouse" style="color: #3b82f6;"></i> ESTOQUE ATUAL</h4>
                 <h5>Total: 56 unidades (41 disponíveis)</h5>
@@ -1171,7 +1158,6 @@
                 </div>
             </div>
 
-            <!-- PERFORMANCE -->
             <div class="timeline-card">
                 <h4><i class="fas fa-trophy" style="color: #f59e0b;"></i> PERFORMANCE 2025</h4>
                 
@@ -1204,7 +1190,6 @@
             </div>
         </div>
 
-        <!-- Gráficos de Performance -->
         <div class="charts-container">
             <div class="chart-card">
                 <h4><i class="fas fa-chart-line"></i> Performance de Atingimento</h4>
@@ -1221,7 +1206,6 @@
         </div>
     </div>
 
-    <!-- Painel de Controle de Atendimentos -->
     <div id="controle-atendimentos" class="dashboard">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -1231,7 +1215,6 @@
             <p class="dashboard-subtitle">Gestão completa de visitas e atendimentos comerciais</p>
         </div>
 
-        <!-- Filtros -->
         <div class="filter-container">
             <div class="date-range">
                 <div class="filter-group">
@@ -1277,7 +1260,6 @@
             </div>
         </div>
 
-        <!-- Métricas Rápidas -->
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-header">
@@ -1321,7 +1303,6 @@
             </div>
         </div>
 
-        <!-- Gráficos de Atendimentos -->
         <div class="charts-container">
             <div class="chart-card">
                 <h4><i class="fas fa-chart-pie"></i> Atendimentos por Diretoria</h4>
@@ -1337,7 +1318,6 @@
             </div>
         </div>
 
-        <!-- Tabela de Atendimentos -->
         <div class="table-container">
             <div class="table-header">
                 <h3 class="table-title">Registro de Atendimentos</h3>
@@ -1384,7 +1364,6 @@
         </div>
     </div>
 
-    <!-- Pipeline de Tratativas -->
     <div id="tratativas" class="dashboard">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -1470,86 +1449,342 @@
 </div>
 
 <script>
-    // Dados globais
-    let atendimentosData = [];
+    // ====================================================================
+    // 1. Configurações Globais & URL da Planilha
+    // ====================================================================
+    let atendimentosData = []; 
     let atendimentosFiltrados = [];
-    let filtrosAtivos = {};
+    let atendimentosPaginados = []; 
     let paginaAtual = 1;
     const itensPorPagina = 10;
-
-    // Variáveis para os gráficos
+    
     let chartDiretoriaAtendimentos = null;
     let chartTipoAtendimentos = null;
 
-    // Sistema de abas
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 Inicializando dashboard...');
-        
-        // Configurar abas
-        const tabs = document.querySelectorAll('.tab');
-        const dashboards = document.querySelectorAll('.dashboard');
+    // URL DO SEU GOOGLE SHEETS PUBLICADO COMO CSV
+const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTokag2KDlpWxGK5V3yk3hFehgxUrVIw9vll3ES4SduXdYTLQLtKDjWQUdCvkLa3M0teXdxeEc/pub?gid=0&single=true&output=csv';    
+    // ====================================================================
+    // 2. Funções Auxiliares de Dados (CSV para JSON)
+    // ====================================================================
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                const target = this.getAttribute('data-target');
-                
-                // Remover active de todas as abas
-                tabs.forEach(t => t.classList.remove('active'));
-                dashboards.forEach(d => d.classList.remove('active'));
-                
-                // Adicionar active na aba clicada
-                this.classList.add('active');
-                document.getElementById(target).classList.add('active');
-                
-                // Inicializar gráficos quando mudar de aba
-                if (target === 'resumo') inicializarGraficosSemana();
-                if (target === 'resumo-mes') inicializarGraficosOutubro();
-                if (target === 'historico-mes') inicializarGraficosSetembro();
-                if (target === 'panorama-estoque') inicializarGraficosEstoque();
-                if (target === 'controle-atendimentos') inicializarGraficosAtendimentos();
-            });
+    // Converte o texto CSV para um Array de Objetos JSON
+    function csvToJson(csv) {
+        const lines = csv.split('\n').filter(line => line.trim() !== '');
+        if (lines.length === 0) return [];
+        
+        let delimiter = ';';
+        // Tenta detectar o delimitador se não for ';'
+        if (!lines[0].includes(';')) {
+            delimiter = ',';
+        }
+
+        // Limpa os cabeçalhos de aspas e espaços
+        let headers = lines[0].split(delimiter).map(h => h.trim().replace(/"/g, ''));
+
+        const result = [];
+        for (let i = 1; i < lines.length; i++) {
+            // Expressão regular para tentar lidar com valores que contenham o delimitador entre aspas
+            const currentline = lines[i].match(new RegExp('(?:\"[^\"]*\"|[^\"\"^' + delimiter + ']*)|$', 'g')).filter(Boolean);
+
+            if (currentline && currentline.length > 0) {
+                const obj = {};
+                for (let j = 0; j < headers.length && j < currentline.length; j++) {
+                    let value = currentline[j] || '';
+                    value = value.trim().replace(/"/g, ''); 
+                    obj[headers[j]] = value;
+                }
+                // Adiciona o objeto se o primeiro campo não estiver vazio
+                if (Object.keys(obj).length > 0 && obj[headers[0]] !== '') {
+                    result.push(obj);
+                }
+            }
+        }
+        return result;
+    }
+
+    // Função Principal de Busca de Dados (Async)
+    async function carregarDadosPlanilha() {
+        const tabelaBody = document.getElementById('tabelaAtendimentos');
+        const statusArea = document.getElementById('statusArea');
+        
+        statusArea.innerHTML = `<div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando dados da planilha...</div>`;
+        tabelaBody.innerHTML = `<tr><td colspan="5" class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr>`;
+
+        try {
+            const response = await fetch(SHEET_DATA_URL);
+
+            if (!response.ok) {
+                throw new Error(`Erro: ${response.statusText}. Status: ${response.status}`);
+            }
+
+            const csvText = await response.text();
+            
+            // Converte o CSV (texto) para JSON (Array de Objetos)
+            atendimentosData = csvToJson(csvText);
+
+            if (atendimentosData.length === 0) {
+                statusArea.innerHTML = `<div class="warning-message"><i class="fas fa-exclamation-triangle"></i> Planilha carregada, mas sem dados.</div>`;
+                tabelaBody.innerHTML = `<tr><td colspan="5">Nenhum registro encontrado.</td></tr>`;
+                return;
+            }
+
+            statusArea.innerHTML = `<div class="success-message"><i class="fas fa-check-circle"></i> Dados carregados com sucesso! Total: ${atendimentosData.length} registros.</div>`;
+            
+            // Aplica filtros padrão e exibe a tabela
+            aplicarFiltros(); 
+            
+        } catch (error) {
+            console.error('Erro no carregamento de dados:', error);
+            tabelaBody.innerHTML = `<tr><td colspan="5" class="error-message">
+                <i class="fas fa-exclamation-triangle"></i> Falha ao carregar os dados.
+            </td></tr>`;
+            statusArea.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-triangle"></i> Erro: Não foi possível buscar o CSV. Detalhe: ${error.message}</div>`;
+        }
+    }
+
+
+    // ====================================================================
+    // 3. Lógica de Filtro, Busca e Paginação
+    // ====================================================================
+
+    function aplicarFiltros() {
+        const dataInicioStr = document.getElementById('filterDataInicio').value;
+        const dataFimStr = document.getElementById('filterDataFim').value;
+        const diretoria = document.getElementById('filterDiretoria').value;
+        const tipo = document.getElementById('filterTipo').value;
+
+        const dataInicio = dataInicioStr ? new Date(dataInicioStr + 'T00:00:00') : null;
+        const dataFim = dataFimStr ? new Date(dataFimStr + 'T23:59:59') : null;
+
+        atendimentosFiltrados = atendimentosData.filter(item => {
+            // Assumindo que a coluna de data se chama 'Data' no CSV
+            const itemDate = item.Data ? new Date(item.Data + 'T00:00:00') : null;
+
+            let passaData = true;
+            if (dataInicio && itemDate && itemDate < dataInicio) passaData = false;
+            if (dataFim && itemDate && itemDate > dataFim) passaData = false;
+
+            // Tentativa de pegar o nome da diretoria de 'Diretoria' ou 'Empresa'
+            const diretoriaKey = item.Diretoria || item.Empresa || ''; 
+            let passaDiretoria = diretoria === 'todas' || diretoriaKey.toUpperCase() === diretoria.toUpperCase();
+
+            // Tentativa de pegar o tipo de 'Tipo de Visita' ou 'Tipo'
+            const tipoKey = item['Tipo de Visita'] || item.Tipo || ''; 
+            let passaTipo = tipo === 'todos' || tipoKey.toUpperCase() === tipo.toUpperCase();
+
+            return passaData && passaDiretoria && passaTipo;
         });
 
-        // Configurar datas padrão
+        document.getElementById('searchInput').value = '';
+        paginaAtual = 1;
+        filtrarTabela();
+    }
+
+    function limparFiltros() {
+        document.getElementById('filterDiretoria').value = 'todas';
+        document.getElementById('filterTipo').value = 'todos';
+
+        // Resetar datas para os últimos 30 dias (padrão)
         const dataFim = new Date();
         const dataInicio = new Date();
         dataInicio.setDate(dataInicio.getDate() - 30);
         
         document.getElementById('filterDataInicio').value = dataInicio.toISOString().split('T')[0];
         document.getElementById('filterDataFim').value = dataFim.toISOString().split('T')[0];
+        
+        aplicarFiltros();
+    }
 
-        // Sistema de tooltips
-        document.addEventListener('mouseover', function(e) {
-            if (e.target.classList.contains('tratativa-item') && e.target.hasAttribute('data-tooltip')) {
-                const tooltip = document.createElement('div');
-                tooltip.className = 'tooltip show';
-                tooltip.textContent = e.target.getAttribute('data-tooltip');
-                document.body.appendChild(tooltip);
-                
-                const rect = e.target.getBoundingClientRect();
-                tooltip.style.left = (rect.left + rect.width / 2 - tooltip.offsetWidth / 2) + 'px';
-                tooltip.style.top = (rect.bottom + 5) + 'px';
-                
-                e.target._currentTooltip = tooltip;
-            }
+    function limparBusca() {
+        document.getElementById('searchInput').value = '';
+        filtrarTabela();
+    }
+
+    function filtrarTabela() {
+        const termoBusca = document.getElementById('searchInput').value.toLowerCase();
+        
+        // Aplica filtro de busca ao conjunto já filtrado por data/dropdowns
+        atendimentosPaginados = atendimentosFiltrados.filter(item => {
+            const itemString = Object.values(item).join(' ').toLowerCase();
+            return itemString.includes(termoBusca);
         });
 
-        document.addEventListener('mouseout', function(e) {
-            if (e.target.classList.contains('tratativa-item') && e.target._currentTooltip) {
-                e.target._currentTooltip.remove();
-                e.target._currentTooltip = null;
-            }
+        atualizarMetricas(atendimentosPaginados);
+        inicializarGraficosAtendimentos(atendimentosPaginados);
+        
+        paginaAtual = 1;
+        popularTabela(atendimentosPaginados);
+    }
+    
+    function popularTabela(data) {
+        const tabelaBody = document.getElementById('tabelaAtendimentos');
+        tabelaBody.innerHTML = '';
+
+        const totalPaginas = Math.ceil(data.length / itensPorPagina);
+        paginaAtual = Math.min(Math.max(1, paginaAtual), totalPaginas || 1); 
+
+        const inicio = (paginaAtual - 1) * itensPorPagina;
+        const fim = inicio + itensPorPagina;
+        const dadosPagina = data.slice(inicio, fim);
+        
+        if (dadosPagina.length === 0 && data.length > 0) {
+            // Caso a busca ou filtro esvazie a página, volta para a última página válida
+            paginaAtual = totalPaginas;
+            popularTabela(data);
+            return;
+        }
+        
+        if (dadosPagina.length === 0) {
+            tabelaBody.innerHTML = `<tr><td colspan="5">Nenhum registro encontrado.</td></tr>`;
+        } else {
+            dadosPagina.forEach(item => {
+                // Mapeamento de colunas (Ajuste se os nomes do seu CSV forem diferentes!)
+                const diretoria = item.Diretoria || item.Empresa || 'N/A';
+                const tipo = item['Tipo de Visita'] || item.Tipo || 'N/A';
+                const corretor = item.Corretor || 'N/A';
+                const gerente = item.Gerente || 'N/A';
+                const dataFormatada = item.Data || 'N/A'; // Assumindo formato YYYY-MM-DD ou DD/MM/YYYY
+
+                // Gera a classe CSS dinamicamente para o badge
+                const diretoriaClass = 'diretoria-' + diretoria.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+                const row = `
+                    <tr>
+                        <td>${dataFormatada}</td>
+                        <td><span class="tipo-badge">${tipo}</span></td>
+                        <td>${corretor}</td>
+                        <td>${gerente}</td>
+                        <td><span class="diretoria-badge ${diretoriaClass}">${diretoria}</span></td>
+                    </tr>
+                `;
+                tabelaBody.innerHTML += row;
+            });
+        }
+
+        // Atualiza a paginação
+        document.getElementById('paginationInfo').textContent = `Mostrando ${inicio + 1} a ${inicio + dadosPagina.length} de ${data.length} registros`;
+        document.getElementById('btnPrev').disabled = paginaAtual === 1 || data.length === 0;
+        document.getElementById('btnNext').disabled = paginaAtual === totalPaginas || data.length === 0;
+    }
+
+    function mudarPagina(direcao) {
+        paginaAtual += direcao;
+        popularTabela(atendimentosPaginados);
+    }
+    
+    // ====================================================================
+    // 4. Métricas e Gráficos Dinâmicos
+    // ====================================================================
+
+    function atualizarMetricas(data) {
+        const total = data.length;
+        // As chaves no CSV devem ser as mesmas usadas aqui (ex: 'YUNY STORE')
+        const store = data.filter(item => (item.Diretoria || item.Empresa)?.toUpperCase() === 'YUNY STORE').length;
+        const homesphere = data.filter(item => (item.Diretoria || item.Empresa)?.toUpperCase() === 'HOMESPHERE').length;
+        const parcerias = data.filter(item => (item.Diretoria || item.Empresa)?.toUpperCase() === 'PARCERIAS').length;
+
+        document.getElementById('totalAtendimentos').textContent = total;
+        document.getElementById('totalStore').textContent = store;
+        document.getElementById('totalHomesphere').textContent = homesphere;
+        document.getElementById('totalParcerias').textContent = parcerias;
+    }
+
+    function inicializarGraficosAtendimentos(data = atendimentosPaginados) {
+        // 1. Gráfico de Diretoria (Pie)
+        const ctx1 = document.getElementById('chartDiretoriaAtendimentos').getContext('2d');
+        if (chartDiretoriaAtendimentos) chartDiretoriaAtendimentos.destroy();
+
+        const diretorias = {};
+        data.forEach(item => {
+            const dir = (item.Diretoria || item.Empresa || 'Outros').toUpperCase();
+            diretorias[dir] = (diretorias[dir] || 0) + 1;
         });
 
-        // Inicializar gráficos
-        inicializarGraficosSemana();
-        inicializarGraficosOutubro();
-        inicializarGraficosSetembro();
-        inicializarGraficosEstoque();
+        const labels = Object.keys(diretorias);
+        const chartData = Object.values(diretorias);
+        const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
-        // Carregar dados da planilha
-        carregarDadosPlanilha();
-    });
+        chartDiretoriaAtendimentos = new Chart(ctx1, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: chartData,
+                    backgroundColor: colors.slice(0, labels.length)
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // 2. Gráfico de Tipo (Bar)
+        const ctx2 = document.getElementById('chartTipoAtendimentos').getContext('2d');
+        if (chartTipoAtendimentos) chartTipoAtendimentos.destroy();
+        
+        const tipos = {};
+        data.forEach(item => {
+            const tipo = (item['Tipo de Visita'] || item.Tipo || 'Outros').toUpperCase();
+            tipos[tipo] = (tipos[tipo] || 0) + 1;
+        });
+
+        const tipoLabels = Object.keys(tipos);
+        const tipoData = Object.values(tipos);
+
+        chartTipoAtendimentos = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: tipoLabels,
+                datasets: [{
+                    label: 'Atendimentos',
+                    data: tipoData,
+                    backgroundColor: '#3b82f6'
+                }]
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    // ====================================================================
+    // 5. Exportação
+    // ====================================================================
+
+    function exportarParaCSV() {
+        if (atendimentosPaginados.length === 0) {
+            alert("Não há dados filtrados para exportar.");
+            return;
+        }
+
+        const headers = Object.keys(atendimentosPaginados[0]);
+        // Usa ; como separador e aspas para envolver valores para segurança
+        let csvContent = headers.map(h => `"${h}"`).join(";") + "\n";
+
+        atendimentosPaginados.forEach(item => {
+            const row = headers.map(header => {
+                let value = item[header] || '';
+                // Limpa aspas e quebras de linha para evitar quebras no CSV
+                return `"${String(value).replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+            }).join(";");
+            csvContent += row + "\n";
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "Atendimentos_Exportados.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+    
+    // ====================================================================
+    // 6. Funções de Inicialização Estáticas (Originais do seu código)
+    // ====================================================================
 
     // Inicializar gráficos da semana - ATUALIZADO
     function inicializarGraficosSemana() {
@@ -1823,16 +2058,78 @@
         }
     }
 
-    // ... (restante das funções de filtro, paginação, etc. permanecem iguais) ...
 
-    // Função para carregar dados da planilha (mantida para referência)
-    async function carregarDadosPlanilha() {
-        // Esta função permanece aqui mas não será usada por enquanto
-        // conforme combinado, vamos focar nos ajustes visuais primeiro
-        console.log('📊 Integração com Google Sheets disponível');
-    }
+    // ====================================================================
+    // 7. Event Listener de Inicialização (Mantido do Original)
+    // ====================================================================
 
-    // ... (restante das funções de filtro, paginação, etc. permanecem iguais) ...
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Inicializando dashboard...');
+        
+        // Configurar abas
+        const tabs = document.querySelectorAll('.tab');
+        const dashboards = document.querySelectorAll('.dashboard');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const target = this.getAttribute('data-target');
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                dashboards.forEach(d => d.classList.remove('active'));
+                
+                this.classList.add('active');
+                document.getElementById(target).classList.add('active');
+                
+                // Inicializar gráficos quando mudar de aba
+                if (target === 'resumo') inicializarGraficosSemana();
+                if (target === 'resumo-mes') inicializarGraficosOutubro();
+                if (target === 'historico-mes') inicializarGraficosSetembro();
+                if (target === 'panorama-estoque') inicializarGraficosEstoque();
+                // Chama a inicialização dos gráficos de atendimentos com os dados carregados
+                if (target === 'controle-atendimentos') inicializarGraficosAtendimentos(); 
+            });
+        });
+
+        // Configurar datas padrão
+        const dataFim = new Date();
+        const dataInicio = new Date();
+        dataInicio.setDate(dataInicio.getDate() - 30);
+        
+        document.getElementById('filterDataInicio').value = dataInicio.toISOString().split('T')[0];
+        document.getElementById('filterDataFim').value = dataFim.toISOString().split('T')[0];
+
+        // Sistema de tooltips (mantido)
+        document.addEventListener('mouseover', function(e) {
+            if (e.target.classList.contains('tratativa-item') && e.target.hasAttribute('data-tooltip')) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip show';
+                tooltip.textContent = e.target.getAttribute('data-tooltip');
+                document.body.appendChild(tooltip);
+                
+                const rect = e.target.getBoundingClientRect();
+                tooltip.style.left = (rect.left + rect.width / 2 - tooltip.offsetWidth / 2) + 'px';
+                tooltip.style.top = (rect.bottom + 5) + 'px';
+                
+                e.target._currentTooltip = tooltip;
+            }
+        });
+
+        document.addEventListener('mouseout', function(e) {
+            if (e.target.classList.contains('tratativa-item') && e.target._currentTooltip) {
+                e.target._currentTooltip.remove();
+                e.target._currentTooltip = null;
+            }
+        });
+
+        // Inicializar gráficos estáticos iniciais
+        inicializarGraficosSemana();
+        inicializarGraficosOutubro();
+        inicializarGraficosSetembro();
+        inicializarGraficosEstoque();
+
+        // Carregar dados da planilha ao iniciar o DOM
+        carregarDadosPlanilha();
+    });
 </script>
 </body>
 </html>

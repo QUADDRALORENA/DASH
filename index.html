@@ -419,6 +419,7 @@
             list-style: none;
             padding-left: 0;
             margin-top: 10px;
+            min-height: 50px; /* Garante que a UL tenha um tamanho mínimo */
         }
 
         .timeline-card ul li {
@@ -1372,77 +1373,38 @@
             </h1>
             <p class="dashboard-subtitle">Visão detalhada do funil de vendas</p>
         </div>
+        
+        <div id="tratativas-status">
+            <div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando dados do Pipeline...</div>
+        </div>
 
         <div class="timeline-container">
             <div class="timeline-card" style="width: 320px;">
-                <h4><i class="fas fa-check-circle" style="color: #10b981;"></i> Unidades Vendidas (15)</h4>
-                <p style="font-weight: bold; color: #10b981; margin-bottom: 15px;">VGV VENDIDO: R$ 172.398.088,00</p>
-
-                <div class="list-group">
-                    <h5><i class="fas fa-store-alt" style="color: #6366f1;"></i> STORE</h5>
-                    <ul>
-                        <li class="tratativa-item">91 Jardins - Store - Vez</li>
-                        <li class="tratativa-item" data-tooltip="GUSTAVO STORE - Cliente comprou na abertura do Stand">62 Europa - ONLINE</li>
-                        <li class="tratativa-item" data-tooltip="GUSTAVO STORE - Cliente investidor, comprou a vista">51 Europa - CARTEIRA</li>
-                        <li class="tratativa-item" data-tooltip="ANANIAS STORE - Cliente de Vez">71 Jardins - VEZ</li>
-                        <li class="tratativa-item" data-tooltip="GUSTAVO STORE - CEO Claro">41 Europa – CARTEIRA</li>
-                        <li class="tratativa-item">92 Europa - ONLINE</li>
-                        <li class="tratativa-item">82 Europa - ONLINE</li>
+                <h4><i class="fas fa-check-circle" style="color: #10b981;"></i> Unidades Vendidas (<span id="vendidas-count">0</span>)</h4>
+                <p style="font-weight: bold; color: #10b981; margin-bottom: 15px;">VGV VENDIDO: <span id="vendido-vgv">R$ 0,00</span></p>
+                <ul id="lista-vendidas">
                     </ul>
-                </div>
-                <div class="list-group">
-                    <h5><i class="fas fa-home" style="color: #6366f1;"></i> HOMESPHERE</h5>
-                    <ul>
-                        <li class="tratativa-item" data-tooltip="Venda nova da Homesphere - R$ 14.950.000">121 Jardins - ONLINE</li>
-                        <li class="tratativa-item" data-tooltip="Cliente investidor. Carteira da Homesphere">111 Parque - CARTEIRA</li>
-                    </ul>
-                </div>
-                <div class="list-group">
-                    <h5><i class="fas fa-handshake" style="color: #f59e0b;"></i> PARCERIAS</h5>
-                    <ul>
-                        <li class="tratativa-item" data-tooltip="Venda direta Parcerias">81 Jardins - CARTEIRA</li>
-                        <li class="tratativa-item">101 Europa - ONLINE (meia venda)</li>
-                    </ul>
-                </div>
-                <div class="list-group">
-                    <h5><i class="fas fa-building" style="color: #8b5cf6;"></i> DIRETORIA</h5>
-                    <ul>
-                        <li class="tratativa-item" data-tooltip="Venda direta Diretoria">131 Parque</li>
-                        <li class="tratativa-item">121 Parque</li>
-                        <li class="tratativa-item">81 Jardins</li>
-                        <li class="tratativa-item">81 Europa</li>
-                    </ul>
-                </div>
             </div>
-
             <div class="timeline-card" style="width: 320px;">
-                <h4><i class="fas fa-file-signature" style="color: #6366f1;"></i> PROCESSO</h4>
+                <h4><i class="fas fa-file-signature" style="color: #6366f1;"></i> PROCESSO (<span id="processo-count">0</span>)</h4>
                 <h5>Em fase de assinatura final</h5>
-                <p style="font-weight: bold; color: #6366f1; margin-bottom: 15px;">VGV RODADO (3): R$ 29.950.000,00</p>
-                <ul>
-                    <li class="tratativa-item">61 Europa - Store - Carteira (R$ 10.100.000)</li>
-                    <li class="tratativa-item">91 Europa - Parcerias (R$ 10.550.000)</li>
-                    <li class="tratativa-item">71 Europa - Parcerias (R$ 9.700.000)</li>
-                </ul>
+                <p style="font-weight: bold; color: #6366f1; margin-bottom: 15px;"><span id="processo-vgv">VGV RODADO (0): R$ 0,00</span></p>
+                <ul id="lista-processo">
+                    </ul>
             </div>
-
             <div class="timeline-card" style="width: 320px;">
-                <h4><i class="fas fa-paper-plane" style="color: #f59e0b;"></i> Propostas</h4>
-                <h5>Enviadas para o cliente (2) </h5>
-                <ul>
-                    <li class="tratativa-item">142 Europa - Store (R$ 14.000.000)</li>
-                    <li class="tratativa-item">52 Europa - Parcerias (R$ 10.000.000)</li>
-                </ul>
+                <h4><i class="fas fa-paper-plane" style="color: #f59e0b;"></i> Propostas (<span id="propostas-count-pipe">0</span>)</h4>
+                <h5>Enviadas para o cliente</h5>
+                <p style="font-weight: bold; color: #f59e0b; margin-bottom: 15px;"><span id="propostas-vgv">VGV Propostas (0): R$ 0,00</span></p>
+                <ul id="lista-propostas">
+                    </ul>
             </div>
-
             <div class="timeline-card" style="width: 320px;">
-                <h4><i class="fas fa-comments" style="color: #06b6d4;"></i> TRATATIVAS</h4>
+                <h4><i class="fas fa-comments" style="color: #06b6d4;"></i> TRATATIVAS (<span id="tratativas-count-pipe">0</span>)</h4>
                 <h5>Em negociação avançada</h5>
-                <ul>
-                    <li class="tratativa-item">42 Europa - Ferrari</li>
-                    <li class="tratativa-item">102 Europa - Ferrari</li>
-                    <li class="tratativa-item">72 Europa - Diretoria</li>
-                </ul>
+                <p style="font-weight: bold; color: #06b6d4; margin-bottom: 15px;"><span id="tratativas-vgv">VGV Tratativas (0): R$ 0,00</span></p>
+                <ul id="lista-tratativas">
+                    </ul>
             </div>
         </div>
     </div>
@@ -1463,6 +1425,9 @@
 
     // URL DO SEU GOOGLE SHEETS PUBLICADO COMO CSV (MANTIDO DO SEU CÓDIGO)
     const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTokag2KDlpWxGK5V3yk3hFehgxUrVIw9vll3ES4SduXdYTLQLtKDjWQUdCvkLa3M0teXdxeEc/pub?gid=0&single=true&output=csv'; 
+    
+    // **NOVO** URL para a Planilha de Pipeline de Tratativas (Baseado no seu segundo link)
+    const URL_PIPELINE_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSWVGFr4bPew5Q4j3mo2QLY2tPgNSDFjZ4T40X3-D8bnWwIPKnHf_nhvWE34WMRJEqGYqD3e3hnKvDz/pub?gid=0&single=true&output=csv'; 
     
     // Nomes das colunas no seu arquivo CSV (Chaves dos objetos JSON)
     const COL_DATA = 'Data'; 
@@ -1544,7 +1509,7 @@
         return result;
     }
 
-    // Função Principal de Busca de Dados (Async)
+    // Função Principal de Busca de Dados para Atendimentos (Async)
     async function carregarDadosPlanilha() {
         const tabelaBody = document.getElementById('tabelaAtendimentos');
         const statusArea = document.getElementById('statusArea');
@@ -1581,6 +1546,68 @@
                 <i class="fas fa-exclamation-triangle"></i> Falha ao carregar os dados.
             </td></tr>`;
             statusArea.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-triangle"></i> Erro: Não foi possível buscar o CSV. Detalhe: ${error.message}</div>`;
+        }
+    }
+    
+    // **NOVA** Função Principal de Busca de Dados para o Pipeline (Async)
+    async function carregarDadosPipeline() {
+        const statusArea = document.getElementById('tratativas-status');
+        
+        try {
+            const response = await fetch(URL_PIPELINE_CSV);
+
+            if (!response.ok) {
+                throw new Error(`Erro: ${response.statusText}. Status: ${response.status}`);
+            }
+
+            const csvText = await response.text();
+            
+            const [firstLine, ...dataLines] = csvText.split('\n').filter(l => l.trim() !== '');
+            const delimiter = firstLine.includes(';') ? ';' : ',';
+
+            const pipelineData = dataLines.map(line => {
+                const cols = line.split(delimiter).map(c => c.trim().replace(/"/g, ''));
+                
+                // ATENÇÃO: A ORDEM DAS COLUNAS É ESSENCIAL
+                // NOVA ORDEM: Unidade(0), Torre(1), Empresa(2), Origem(3), Status(4), VGV(5)
+                
+                // CORREÇÃO: Limpeza mais robusta do VGV
+                let vgvValue = 0;
+                // O VGV agora está na 6ª coluna (índice 5)
+                if (cols[5]) { 
+                    try {
+                        const cleanedVGV = cols[5] // O VGV agora está em cols[5]
+                            .replace(/R\$/, '') // Remove R$
+                            .replace(/\s/g, '') // Remove todos os espaços (crucial para limpar a célula)
+                            .replace(/\./g, '') // Remove pontos (separador de milhar)
+                            .replace(',', '.');  // Substitui vírgula (decimal) por ponto
+                        
+                        vgvValue = parseFloat(cleanedVGV) || 0; // Garante que NaN vire 0
+                    } catch (e) {
+                        console.warn("Erro ao processar VGV:", cols[5], e);
+                        vgvValue = 0;
+                    }
+                }
+
+                return {
+                    status: cols[4] || '', // Status é a 5ª coluna (índice 4)
+                    unidade: cols[0] || '', // Unidade é a 1ª coluna (índice 0)
+                    diretoria: cols[2] || '', // Empresa (Diretoria) é a 3ª coluna (índice 2)
+                    vgv: vgvValue, 
+                    detalhe: cols[3] || '' // Origem (Detalhe) é a 4ª coluna (índice 3)
+                };
+            }).filter(item => item.vgv > 0 && item.status.length > 0); 
+            
+            if (pipelineData.length === 0) {
+                statusArea.innerHTML = `<div class="warning-message"><i class="fas fa-exclamation-triangle"></i> Planilha Pipeline carregada, mas sem dados válidos. Confirme se as colunas estão na ordem correta e se o VGV (6ª coluna, índice 5) tem valores numéricos.</div>`;
+            } else {
+                statusArea.innerHTML = `<div class="success-message"><i class="fas fa-check-circle"></i> Dados do Pipeline carregados com sucesso! Total: ${pipelineData.length} registros.</div>`;
+                atualizarPipeline(pipelineData);
+            }
+            
+        } catch (error) {
+            console.error('Erro ao carregar dados do pipeline:', error);
+            statusArea.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar dados do Pipeline. Detalhe: ${error.message}</div>`;
         }
     }
 
@@ -1743,8 +1770,8 @@
         const homesphere = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'HOMESPHERE').length;
         const parcerias = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'PARCERIAS').length;
         // Outras diretorias que podem estar presentes mas não tem card específico:
-        const sell = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'YUNY SELL').length;
-        const diretoriaGeral = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'DIRETORIA').length;
+        // const sell = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'YUNY SELL').length;
+        // const diretoriaGeral = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'DIRETORIA').length;
 
 
         document.getElementById('totalAtendimentos').textContent = total;
@@ -1752,8 +1779,6 @@
         document.getElementById('totalHomesphere').textContent = homesphere;
         document.getElementById('totalParcerias').textContent = parcerias;
 
-        // Se quiser ver um total de todas as diretorias não especificadas:
-        // const outros = total - (store + homesphere + parcerias + sell + diretoriaGeral);
     }
 
     function inicializarGraficosAtendimentos(data = atendimentosPaginados) {
@@ -1826,7 +1851,7 @@
         atendimentosPaginados.forEach(item => {
             const row = COLUNAS_EXPORTAR.map(header => {
                 let value = item[header] || '';
-                // Sanitiza o valor para CSV (envolve com aspas, troca ; por , e remove quebras de linha)
+                // Sanitiza o valor para CSV (envolve com aspas, troca ; por ,, e remove quebras de linha)
                 return `"${String(value).replace(/"/g, '""').replace(/;/, ',').replace(/\n/g, ' ')}"`;
             }).join(";");
             csvContent += row + "\n";
@@ -1846,7 +1871,95 @@
     }
     
     // ====================================================================
-    // 6. Funções de Inicialização Estáticas (MANTIDAS)
+    // 6. Funções de Lógica do Pipeline de Tratativas (NOVO)
+    // ====================================================================
+
+    function formatarVGV(valor) {
+        if (isNaN(valor) || valor === 0) return 'R$ 0,00';
+        // Formata o valor com separador de milhar e decimal do Brasil
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+    }
+
+    function renderizarListaPipeline(idLista, itens) {
+        const ul = document.getElementById(idLista);
+        if (!ul) return;
+        
+        ul.innerHTML = ''; // Limpa a lista existente
+
+        if (itens.length === 0) {
+            ul.innerHTML = `<li>Nenhum item nesta fase.</li>`;
+            return;
+        }
+
+        itens.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'tratativa-item';
+            
+            // Define o texto principal: Unidade - Diretoria - Detalhe (Origem)
+            li.textContent = `${item.unidade} - ${item.diretoria} - ${item.detalhe}`;
+            
+            // Adiciona o tooltip com o VGV formatado
+            const tooltipText = `${item.unidade} (VGV: ${formatarVGV(item.vgv)})`;
+            li.setAttribute('data-tooltip', tooltipText);
+
+            ul.appendChild(li);
+        });
+    }
+
+    function atualizarPipeline(dados) {
+        // Inicializar agrupamentos (Case Insensitive e Trimmed)
+        const grupos = {
+            'VENDIDO': [],
+            'EM PROCESSO': [],
+            'PROPOSTA ENVIADA': [],
+            'TRATATIVA AVANÇADA': []
+        };
+        
+        // 1. Classificar e Agrupar
+        dados.forEach(item => {
+            const statusKey = item.status.toUpperCase().trim();
+            // Mapeamento de status para os grupos fixos
+            if (statusKey.includes('VENDIDO')) {
+                grupos['VENDIDO'].push(item);
+            } else if (statusKey.includes('PROCESSO') || statusKey.includes('ASSINATURA')) {
+                grupos['EM PROCESSO'].push(item);
+            } else if (statusKey.includes('PROPOSTA')) {
+                grupos['PROPOSTA ENVIADA'].push(item);
+            } else if (statusKey.includes('TRATATIVA')) {
+                grupos['TRATATIVA AVANÇADA'].push(item);
+            }
+        });
+        
+        const vgvTotalVendido = grupos['VENDIDO'].reduce((sum, item) => sum + item.vgv, 0);
+        const vgvTotalProcesso = grupos['EM PROCESSO'].reduce((sum, item) => sum + item.vgv, 0);
+        const vgvTotalPropostas = grupos['PROPOSTA ENVIADA'].reduce((sum, item) => sum + item.vgv, 0);
+        const vgvTotalTratativas = grupos['TRATATIVA AVANÇADA'].reduce((sum, item) => sum + item.vgv, 0);
+        
+        // 2. Atualização dos Cards (IDs no HTML)
+        
+        // Card 1: VENDIDO
+        document.getElementById('vendidas-count').textContent = grupos['VENDIDO'].length;
+        document.getElementById('vendido-vgv').textContent = formatarVGV(vgvTotalVendido);
+        renderizarListaPipeline('lista-vendidas', grupos['VENDIDO']);
+        
+        // Card 2: PROCESSO
+        document.getElementById('processo-count').textContent = grupos['EM PROCESSO'].length;
+        document.getElementById('processo-vgv').textContent = `VGV RODADO (${grupos['EM PROCESSO'].length}): ${formatarVGV(vgvTotalProcesso)}`;
+        renderizarListaPipeline('lista-processo', grupos['EM PROCESSO']);
+
+        // Card 3: PROPOSTAS
+        document.getElementById('propostas-count-pipe').textContent = grupos['PROPOSTA ENVIADA'].length;
+        document.getElementById('propostas-vgv').textContent = `VGV Propostas (${grupos['PROPOSTA ENVIADA'].length}): ${formatarVGV(vgvTotalPropostas)}`;
+        renderizarListaPipeline('lista-propostas', grupos['PROPOSTA ENVIADA']);
+
+        // Card 4: TRATATIVAS
+        document.getElementById('tratativas-count-pipe').textContent = grupos['TRATATIVA AVANÇADA'].length;
+        document.getElementById('tratativas-vgv').textContent = `VGV Tratativas (${grupos['TRATATIVA AVANÇADA'].length}): ${formatarVGV(vgvTotalTratativas)}`;
+        renderizarListaPipeline('lista-tratativas', grupos['TRATATIVA AVANÇADA']);
+    }
+
+    // ====================================================================
+    // 7. Funções de Inicialização Estáticas (MANTIDAS)
     // ====================================================================
 
     // Inicializar gráficos da semana - MANTIDO
@@ -2123,7 +2236,7 @@
 
 
     // ====================================================================
-    // 7. Event Listener de Inicialização (MANTIDO)
+    // 8. Event Listener de Inicialização (ATUALIZADO)
     // ====================================================================
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -2191,7 +2304,8 @@
         inicializarGraficosEstoque();
 
         // Carregar dados da planilha ao iniciar o DOM
-        carregarDadosPlanilha();
+        carregarDadosPlanilha(); // Carrega dados da aba 5 (Controle de Atendimentos)
+        carregarDadosPipeline(); // **NOVO** - Carrega dados da aba 6 (Pipeline de Tratativas)
     });
 </script>
 </body>

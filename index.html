@@ -1526,36 +1526,6 @@
                     <div class="vgv-total" id="vgvVendido">R$ 0</div>
                 </div>
                 <div class="col-content" id="pipelineVendido">
-                    
-                    <div class="pipeline-diretoria">
-                        <h4>STORE <span class="diretoria-vgv" id="vgvStore">R$ 0</span></h4>
-                        <div id="vendidoStore" class="diretoria-items">
-                            </div>
-                    </div>
-
-                    <div class="pipeline-diretoria">
-                        <h4>HOMESPHERE <span class="diretoria-vgv" id="vgvHomesphere">R$ 0</span></h4>
-                        <div id="vendidoHomesphere" class="diretoria-items">
-                            </div>
-                    </div>
-                    
-                    <div class="pipeline-diretoria">
-                        <h4>PARCERIAS <span class="diretoria-vgv" id="vgvParcerias">R$ 0</span></h4>
-                        <div id="vendidoParcerias" class="diretoria-items">
-                            </div>
-                    </div>
-                    
-                    <div class="pipeline-diretoria">
-                        <h4>YUNY SELL <span class="diretoria-vgv" id="vgvYunySell">R$ 0</span></h4>
-                        <div id="vendidoYunySell" class="diretoria-items">
-                            </div>
-                    </div>
-                    
-                    <div class="pipeline-diretoria">
-                        <h4>DIRETORIA <span class="diretoria-vgv" id="vgvDiretoria">R$ 0</span></h4>
-                        <div id="vendidoDiretoria" class="diretoria-items">
-                            </div>
-                    </div>
                     </div>
             </div>
 
@@ -1635,6 +1605,15 @@
     const COL_PIPELINE_ORIGEM = 'ORIGEM';
     const COL_PIPELINE_TOOLTIP = 'TOOLTIP';
     const COL_PIPELINE_VGV = 'VGV'; 
+
+    // NOVO: Ordem das diretorias para as colunas do Pipeline
+    const DIRETORIA_KEYS = [
+        { key: 'STORE', label: 'STORE' },
+        { key: 'YUNYSELL', label: 'YUNY SELL' },
+        { key: 'PARCERIAS', label: 'PARCERIAS' },
+        { key: 'HOMESPHERE', label: 'HOMESPHERE' },
+        { key: 'DIRETORIA', label: 'DIRETORIA' }
+    ];
 
     // ====================================================================
     // 2. Funções Auxiliares de Dados (CSV para JSON e Data Parsing)
@@ -1736,7 +1715,7 @@
     }
 
     // ====================================================================
-    // 3. LÓGICA DE CARREGAMENTO DE DADOS - ATENDIMENTOS (CORRIGIDA)
+    // 3. LÓGICA DE CARREGAMENTO DE DADOS - ATENDIMENTOS
     // ====================================================================
 
     async function carregarDadosPlanilha() {
@@ -2000,8 +1979,42 @@
     }
     
     // ====================================================================
-    // 4. LÓGICA DE CARREGAMENTO DE DADOS - PIPELINE (MANTIDA)
+    // 4. LÓGICA DE CARREGAMENTO DE DADOS - PIPELINE (Refatorada para Agrupamento)
     // ====================================================================
+
+    /**
+     * Gera a estrutura de subcategorias (pipeline-diretoria) dentro de um container
+     * e retorna o mapa dos elementos pai criados.
+     * @param {string} statusKey - A chave do status (ex: 'vendido').
+     * @param {HTMLElement} targetElement - O elemento HTML pai da coluna.
+     * @returns {Object} Mapa de elementos pais por chave de diretoria.
+     */
+    function renderPipelineColumn(statusKey, targetElement) {
+        targetElement.innerHTML = ''; // Limpa o conteúdo anterior
+        const directorateElements = {}; // NEW: Mapa para armazenar os elementos pais
+
+        DIRETORIA_KEYS.forEach(d => {
+            // Ex: 'vendido' + 'STORE' -> 'vendidoSTORE'
+            const idBase = statusKey.toLowerCase() + d.key;
+            
+            // Ex: 'vgvVendidoStore'
+            const vgvId = 'vgv' + idBase.charAt(0).toUpperCase() + idBase.slice(1);
+
+            const diretoriaDiv = document.createElement('div');
+            diretoriaDiv.className = 'pipeline-diretoria';
+            
+            diretoriaDiv.innerHTML = `
+                <h4>${d.label} <span class="diretoria-vgv" id="${vgvId}">R$ 0</span></h4>
+                <div id="${idBase}" class="diretoria-items"></div>
+            `;
+            targetElement.appendChild(diretoriaDiv);
+            
+            // NEW: Armazena o elemento pai (div.pipeline-diretoria) pela chave
+            directorateElements[d.key] = diretoriaDiv;
+        });
+        
+        return directorateElements; // Retorna o mapa de elementos para controle de visibilidade
+    }
 
     async function carregarDadosPipeline() {
         const pipelineStatusArea = document.getElementById('pipelineStatusArea');
@@ -2032,32 +2045,53 @@
             pipelineStatusArea.innerHTML = `<span class="error-message"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar o Pipeline. Detalhe: ${error.message}</span>`;
         }
     }
-
+    
     /**
      * Processa os dados do pipeline, conta os itens, calcula o VGV e popula o HTML.
      */
     function popularPipeline(dados) {
-        // Mapeamento dos containers HTML (IDs) e inicialização de contadores e somadores de VGV
-        const columns = {
-            'VENDIDO': { count: 0, vgvSum: 0, elements: { 
-                STORE: { total: 0, vgv: 0, element: document.getElementById('vendidoStore') },
-                HOMESPHERE: { total: 0, vgv: 0, element: document.getElementById('vendidoHomesphere') },
-                PARCERIAS: { total: 0, vgv: 0, element: document.getElementById('vendidoParcerias') },
-                YUNYSELL: { total: 0, vgv: 0, element: document.getElementById('vendidoYunySell') },
-                DIRETORIA: { total: 0, vgv: 0, element: document.getElementById('vendidoDiretoria') } 
-            }, totalElement: document.getElementById('pipelineVendido')}, 
-            'PROCESSO': { count: 0, vgvSum: 0, element: document.getElementById('pipelineProcesso') },
-            'PROPOSTA': { count: 0, vgvSum: 0, element: document.getElementById('pipelineProposta') },
-            'TRATATIVA': { count: 0, vgvSum: 0, element: document.getElementById('pipelineTratativa') }
+        // 1. Containers HTML e Geração da Estrutura
+        const pipelineContainers = {
+            VENDIDO: document.getElementById('pipelineVendido'),
+            PROCESSO: document.getElementById('pipelineProcesso'),
+            PROPOSTA: document.getElementById('pipelineProposta'),
+            TRATATIVA: document.getElementById('pipelineTratativa')
         };
         
-        // 1. Limpar o conteúdo anterior 
-        Object.values(columns.VENDIDO.elements).forEach(el => el.element.innerHTML = '');
-        document.getElementById('pipelineProcesso').innerHTML = '';
-        document.getElementById('pipelineProposta').innerHTML = '';
-        document.getElementById('pipelineTratativa').innerHTML = '';
+        // Renderiza a estrutura de subcategorias e captura o mapa de elementos pais
+        const vendidoParents = renderPipelineColumn('vendido', pipelineContainers.VENDIDO);
+        const processoParents = renderPipelineColumn('processo', pipelineContainers.PROCESSO);
+        const propostaParents = renderPipelineColumn('proposta', pipelineContainers.PROPOSTA);
+        const tratativaParents = renderPipelineColumn('tratativa', pipelineContainers.TRATATIVA);
+        
+        // 2. Inicializa a Estrutura de Tracking
+        const columns = {};
+        Object.keys(pipelineContainers).forEach(status => {
+            // Determina qual mapa de elementos pais usar para o status atual
+            const parentMap = status === 'VENDIDO' ? vendidoParents : 
+                              status === 'PROCESSO' ? processoParents :
+                              status === 'PROPOSTA' ? propostaParents :
+                              tratativaParents; // TRATATIVA
 
-        // 2. Processar os dados e popular as colunas
+            columns[status] = { 
+                count: 0, 
+                vgvSum: 0, 
+                // Cria um mapa de elementos baseado nas diretorias e IDs gerados
+                elements: DIRETORIA_KEYS.reduce((acc, d) => {
+                    const idBase = status.toLowerCase() + d.key;
+                    acc[d.key] = {
+                        total: 0,
+                        vgv: 0,
+                        element: document.getElementById(idBase),
+                        vgvElement: document.getElementById('vgv' + idBase.charAt(0).toUpperCase() + idBase.slice(1)),
+                        parentElement: parentMap[d.key] // NOVO: Elemento pai (div.pipeline-diretoria)
+                    };
+                    return acc;
+                }, {})
+            };
+        });
+
+        // 3. Processar os dados e popular os cards
         dados.forEach(item => {
             const status = (item[COL_PIPELINE_STATUS] || '').toUpperCase();
             const nomeUnidade = item[COL_PIPELINE_UNIDADE] || 'Unidade Desconhecida';
@@ -2074,76 +2108,72 @@
             
             const vgvValue = isNaN(vgvFloat) ? 0 : vgvFloat;
 
-            if (nomeUnidade === 'Unidade Desconhecida') return; 
+            // Ignora a linha se o status for inválido ou a unidade for desconhecida
+            if (nomeUnidade === 'Unidade Desconhecida' || !columns[status]) return; 
 
-            let targetContainer = null;
-            let statusClass = '';
+            const empresa = (item[COL_PIPELINE_EMPRESA] || 'NAOESPECIFICADO').toUpperCase().replace(/\s/g, ''); 
+            // Padroniza YUNY SELL para YUNYSELL
+            const empresaKey = empresa.includes('SELL') ? 'YUNYSELL' : empresa;
 
-            // Lógica para a coluna VENDIDO com sub-agrupamento por EMPRESA
-            if (status === 'VENDIDO') {
-                const empresa = (item[COL_PIPELINE_EMPRESA] || 'NAOESPECIFICADO').toUpperCase().replace(/\s/g, ''); 
-                
-                const empresaKey = empresa.includes('SELL') ? 'YUNYSELL' : empresa;
-
-                if (columns.VENDIDO.elements[empresaKey]) {
-                    targetContainer = columns.VENDIDO.elements[empresaKey].element;
-                    columns.VENDIDO.count++;
-                    columns.VENDIDO.vgvSum += vgvValue;
-                    columns.VENDIDO.elements[empresaKey].total++;
-                    columns.VENDIDO.elements[empresaKey].vgv += vgvValue;
-                    statusClass = 'tratativa-row-vendido';
-                }
-            } 
-            // Lógica para as outras colunas (sem sub-agrupamento)
-            else if (columns[status]) {
-                targetContainer = columns[status].element;
-                columns[status].count++;
-                columns[status].vgvSum += vgvValue;
-                
-                if (status === 'PROCESSO') statusClass = 'tratativa-row-processo';
-                if (status === 'PROPOSTA') statusClass = 'tratativa-row-proposta';
-                if (status === 'TRATATIVA') statusClass = 'tratativa-row-tratativa';
-            }
+            const columnData = columns[status];
+            const diretoriaData = columnData.elements[empresaKey];
             
-            // Se encontrou um container, cria o item e insere
-            if (targetContainer) {
+            if (diretoriaData && diretoriaData.element) {
+                columnData.count++;
+                columnData.vgvSum += vgvValue;
+                diretoriaData.total++;
+                diretoriaData.vgv += vgvValue;
+                
+                let statusClass = '';
+                if (status === 'VENDIDO') statusClass = 'tratativa-row-vendido';
+                else if (status === 'PROCESSO') statusClass = 'tratativa-row-processo';
+                else if (status === 'PROPOSTA') statusClass = 'tratativa-row-proposta';
+                else if (status === 'TRATATIVA') statusClass = 'tratativa-row-tratativa';
+                
                 const itemElement = document.createElement('div');
                 itemElement.className = `tratativa-row ${statusClass}`;
                 
-                itemElement.setAttribute('data-tooltip', `${tooltipContent}${origem !== 'Não Informada' ? ' | Origem: ' + origem : ''}`); 
+                // AJUSTE DO TOOLTIP: Apenas o tooltipContent
+                itemElement.setAttribute('data-tooltip', tooltipContent); 
 
-                // MOSTRAR ORIGEM NO LUGAR DO VGV (conforme solicitado)
+                // HTML do card (mostra a unidade e a origem)
                 itemElement.innerHTML = `
                     <span class="row-unit" title="${nomeUnidade}">${nomeUnidade}</span>
                     <span class="row-origin" title="Origem: ${origem}">${origem}</span>
                 `;
 
-                targetContainer.appendChild(itemElement);
+                diretoriaData.element.appendChild(itemElement);
             }
         });
 
-        // 3. Atualizar as contagens totais e VGV nos cabeçalhos
+        // 4. Atualizar as contagens totais, VGV e VISIBILIDADE
         
-        // VENDIDO
+        // VGV total do Pipeline (topo da coluna)
         document.getElementById('countVendido').textContent = columns.VENDIDO.count;
         document.getElementById('vgvVendido').textContent = formatCurrency(columns.VENDIDO.vgvSum);
-        
-        // Outros Status
         document.getElementById('countProcesso').textContent = columns.PROCESSO.count;
         document.getElementById('vgvProcesso').textContent = formatCurrency(columns.PROCESSO.vgvSum);
-        
         document.getElementById('countProposta').textContent = columns.PROPOSTA.count;
         document.getElementById('vgvProposta').textContent = formatCurrency(columns.PROPOSTA.vgvSum);
-        
         document.getElementById('countTratativa').textContent = columns.TRATATIVA.count;
         document.getElementById('vgvTratativa').textContent = formatCurrency(columns.TRATATIVA.vgvSum);
-
-        // Sub-Agrupamento VENDIDO (Diretorias)
-        document.getElementById('vgvStore').textContent = formatCurrency(columns.VENDIDO.elements.STORE.vgv);
-        document.getElementById('vgvHomesphere').textContent = formatCurrency(columns.VENDIDO.elements.HOMESPHERE.vgv);
-        document.getElementById('vgvParcerias').textContent = formatCurrency(columns.VENDIDO.elements.PARCERIAS.vgv);
-        document.getElementById('vgvYunySell').textContent = formatCurrency(columns.VENDIDO.elements.YUNYSELL.vgv);
-        document.getElementById('vgvDiretoria').textContent = formatCurrency(columns.VENDIDO.elements.DIRETORIA.vgv);
+        
+        // VGV por Diretoria (subtítulos) e Lógica de Ocultamento
+        Object.keys(columns).forEach(status => {
+            Object.values(columns[status].elements).forEach(diretoria => {
+                 if(diretoria.vgvElement) {
+                    diretoria.vgvElement.textContent = formatCurrency(diretoria.vgv);
+                 }
+                 
+                 // Lógica para ocultar a subcategoria se não houver itens
+                 if (diretoria.total === 0 && diretoria.parentElement) {
+                     diretoria.parentElement.style.display = 'none';
+                 } else if (diretoria.parentElement) {
+                     // Garante que subcategorias com dados estejam visíveis
+                     diretoria.parentElement.style.display = 'block';
+                 }
+            });
+        });
     }
 
     // ====================================================================
@@ -2441,7 +2471,7 @@
         // Configurar datas padrão (limparFiltros(true) apenas seta as datas)
         limparFiltros(true); 
 
-        // Sistema de tooltips (mantido, ajustado para a classe tratativa-row)
+        // Sistema de tooltips 
         document.addEventListener('mouseover', function(e) {
             let targetElement = e.target;
             while (targetElement && !targetElement.classList.contains('tratativa-row') && targetElement !== document.body) {
@@ -2493,4 +2523,3 @@
 </script>
 </body>
 </html>
-```

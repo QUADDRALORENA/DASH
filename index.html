@@ -1,3 +1,19 @@
+Puxa, que frustração\! Peço **mil desculpas** por esse erro persistente. Você está corretíssimo: corrigimos a validação de linha no **"Controle de Atendimentos"**, mas introduzimos uma falha na identificação das colunas, resultando no **"ERRO DE CABEÇALHO: Não foi possível encontrar a coluna 'Data'"**.
+
+Este erro aconteceu por uma falha de lógica na função que mapeia as colunas (o `csvToJson`): a busca estava sendo feita de forma **sensível à capitalização** (maiúsculas/minúsculas) após a conversão dos cabeçalhos do CSV para letras maiúsculas.
+
+## 🛠️ Correção Aplicada (Foco no `csvToJson`):
+
+1.  **Correção da Correspondência de Cabeçalho:** A função `csvToJson` foi ajustada para converter o nome da coluna esperada (`'Data'`) para **letras maiúsculas** (`'DATA'`) antes de tentar encontrá-lo nos cabeçalhos do CSV. Isso garante que o código funcionará independentemente de o cabeçalho no seu Google Sheets ser "Data", "data" ou "DATA".
+2.  **Estabilidade Mantida:** A correção anterior que tornava o carregamento do CSV mais tolerante a linhas vazias/incompletas na aba **"Controle de Atendimentos"** foi preservada.
+
+Abaixo está o código HTML/JavaScript **com a correção de cabeçalho aplicada**. Por favor, substitua **todo o conteúdo** do seu arquivo `index.html` novamente:
+
+-----
+
+## **Arquivo `index.html` (Versão Corrigida 2.0)**
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -503,18 +519,158 @@
             cursor: not-allowed;
         }
 
-        .tratativa-item {
+        /* ESTILOS DE PIPELINE - NOVOS */
+        .header-pipeline {
+            margin-bottom: 24px;
+        }
+
+        .pipeline-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            /* Permitir que o container ocupe toda a largura */
+            width: 100%; 
+        }
+
+        .pipeline-col {
+            flex: 0 0 320px; /* Largura fixa para cada coluna */
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh; /* Limita a altura para o scroll funcionar */
+        }
+
+        .col-header {
+            padding: 15px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            flex-direction: column; /* Novo: Para VGV ficar embaixo do count */
+            align-items: flex-start;
+            background-color: var(--light);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            /* Garante que o cabeçalho não role */
+            flex-shrink: 0; 
+        }
+
+        .col-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .col-header .count {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .col-header .count-value {
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.8em;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .col-header .vgv-total {
+            font-size: 1.2rem; /* Mais visível */
+            font-weight: 700;
+            color: var(--success);
+            margin-top: 5px;
+        }
+
+        .col-content {
+            padding: 10px;
+            overflow-y: auto;
+            flex-grow: 1;
+            background-color: #f9fafb; /* Cor de fundo mais clara para o corpo da coluna */
+        }
+
+        /* Estilos para o agrupamento na coluna VENDIDO */
+        .pipeline-diretoria {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .pipeline-diretoria:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .pipeline-diretoria h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-left: 3px solid var(--secondary);
+            padding-left: 8px;
+            display: flex;
+            justify-content: space-between; /* Para alinhar o VGV */
+        }
+
+        .diretoria-vgv {
+            font-size: 0.9em;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        /* Fim dos estilos para agrupamento */
+
+
+        /* NOVO ESTILO MAIS COMPACTO (LINHA) */
+        .tratativa-row {
             position: relative;
             cursor: pointer;
             transition: background-color 0.2s ease;
-            padding: 5px 8px;
-            border-radius: 6px;
-            margin: 2px 0;
+            padding: 6px 8px; /* Reduzida a altura */
+            border-radius: 4px;
+            margin-bottom: 3px; /* Reduzida a margem */
+            background: white;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+            font-size: 0.85em; /* Reduzido o tamanho da fonte */
         }
 
-        .tratativa-item:hover {
+        .tratativa-row:hover {
             background-color: rgba(59, 130, 246, 0.1);
         }
+
+        /* Cores de borda dos cards por Status */
+        .tratativa-row-vendido { border-left: 5px solid var(--success); }
+        .tratativa-row-processo { border-left: 5px solid var(--primary); }
+        .tratativa-row-proposta { border-left: 5px solid var(--warning); }
+        .tratativa-row-tratativa { border-left: 5px solid #06b6d4; } 
+
+        .row-unit {
+            font-weight: 500;
+            color: var(--dark);
+            max-width: 65%; /* Aumentado o espaço para o nome da unidade */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* NOVO ESTILO PARA ORIGEM */
+        .row-origin {
+            font-weight: 500;
+            font-size: 0.9em;
+            color: var(--gray); /* Origem em cor mais discreta */
+            white-space: nowrap;
+        }
+        /* Fim dos estilos de Pipeline */
 
         .tooltip {
             position: absolute;
@@ -1365,88 +1521,102 @@
     </div>
 
     <div id="tratativas" class="dashboard">
-        <div class="dashboard-header">
+        <div class="header-pipeline">
             <h1 class="dashboard-title">
                 <i class="fas fa-filter" style="color: #3b82f6;"></i>
                 Pipeline de Tratativas
             </h1>
             <p class="dashboard-subtitle">Visão detalhada do funil de vendas</p>
+            <div id="pipelineStatusArea" style="margin-top: 10px; font-size: 0.9em;"></div> 
         </div>
+        
+        <div class="pipeline-container">
+            
+            <div class="pipeline-col vendido">
+                <div class="col-header">
+                    <h3>Unidades Vendidas</h3>
+                    <div class="count">
+                        <span>Total:</span>
+                        <span class="count-value" id="countVendido">0</span>
+                    </div>
+                    <div class="vgv-total" id="vgvVendido">R$ 0</div>
+                </div>
+                <div class="col-content" id="pipelineVendido">
+                    
+                    <div class="pipeline-diretoria">
+                        <h4>STORE <span class="diretoria-vgv" id="vgvStore">R$ 0</span></h4>
+                        <div id="vendidoStore" class="diretoria-items">
+                            </div>
+                    </div>
 
-        <div class="timeline-container">
-            <div class="timeline-card" style="width: 320px;">
-                <h4><i class="fas fa-check-circle" style="color: #10b981;"></i> Unidades Vendidas (15)</h4>
-                <p style="font-weight: bold; color: #10b981; margin-bottom: 15px;">VGV VENDIDO: R$ 172.398.088,00</p>
-
-                <div class="list-group">
-                    <h5><i class="fas fa-store-alt" style="color: #6366f1;"></i> STORE</h5>
-                    <ul>
-                        <li class="tratativa-item">91 Jardins - Store - Vez</li>
-                        <li class="tratativa-item" data-tooltip="GUSTAVO STORE - Cliente comprou na abertura do Stand">62 Europa - ONLINE</li>
-                        <li class="tratativa-item" data-tooltip="GUSTAVO STORE - Cliente investidor, comprou a vista">51 Europa - CARTEIRA</li>
-                        <li class="tratativa-item" data-tooltip="ANANIAS STORE - Cliente de Vez">71 Jardins - VEZ</li>
-                        <li class="tratativa-item" data-tooltip="GUSTAVO STORE - CEO Claro">41 Europa – CARTEIRA</li>
-                        <li class="tratativa-item">92 Europa - ONLINE</li>
-                        <li class="tratativa-item">82 Europa - ONLINE</li>
-                    </ul>
-                </div>
-                <div class="list-group">
-                    <h5><i class="fas fa-home" style="color: #6366f1;"></i> HOMESPHERE</h5>
-                    <ul>
-                        <li class="tratativa-item" data-tooltip="Venda nova da Homesphere - R$ 14.950.000">121 Jardins - ONLINE</li>
-                        <li class="tratativa-item" data-tooltip="Cliente investidor. Carteira da Homesphere">111 Parque - CARTEIRA</li>
-                    </ul>
-                </div>
-                <div class="list-group">
-                    <h5><i class="fas fa-handshake" style="color: #f59e0b;"></i> PARCERIAS</h5>
-                    <ul>
-                        <li class="tratativa-item" data-tooltip="Venda direta Parcerias">81 Jardins - CARTEIRA</li>
-                        <li class="tratativa-item">101 Europa - ONLINE (meia venda)</li>
-                    </ul>
-                </div>
-                <div class="list-group">
-                    <h5><i class="fas fa-building" style="color: #8b5cf6;"></i> DIRETORIA</h5>
-                    <ul>
-                        <li class="tratativa-item" data-tooltip="Venda direta Diretoria">131 Parque</li>
-                        <li class="tratativa-item">121 Parque</li>
-                        <li class="tratativa-item">81 Jardins</li>
-                        <li class="tratativa-item">81 Europa</li>
-                    </ul>
-                </div>
+                    <div class="pipeline-diretoria">
+                        <h4>HOMESPHERE <span class="diretoria-vgv" id="vgvHomesphere">R$ 0</span></h4>
+                        <div id="vendidoHomesphere" class="diretoria-items">
+                            </div>
+                    </div>
+                    
+                    <div class="pipeline-diretoria">
+                        <h4>PARCERIAS <span class="diretoria-vgv" id="vgvParcerias">R$ 0</span></h4>
+                        <div id="vendidoParcerias" class="diretoria-items">
+                            </div>
+                    </div>
+                    
+                    <div class="pipeline-diretoria">
+                        <h4>YUNY SELL <span class="diretoria-vgv" id="vgvYunySell">R$ 0</span></h4>
+                        <div id="vendidoYunySell" class="diretoria-items">
+                            </div>
+                    </div>
+                    
+                    <div class="pipeline-diretoria">
+                        <h4>DIRETORIA <span class="diretoria-vgv" id="vgvDiretoria">R$ 0</span></h4>
+                        <div id="vendidoDiretoria" class="diretoria-items">
+                            </div>
+                    </div>
+                    </div>
             </div>
 
-            <div class="timeline-card" style="width: 320px;">
-                <h4><i class="fas fa-file-signature" style="color: #6366f1;"></i> PROCESSO</h4>
-                <h5>Em fase de assinatura final</h5>
-                <p style="font-weight: bold; color: #6366f1; margin-bottom: 15px;">VGV RODADO (3): R$ 29.950.000,00</p>
-                <ul>
-                    <li class="tratativa-item">61 Europa - Store - Carteira (R$ 10.100.000)</li>
-                    <li class="tratativa-item">91 Europa - Parcerias (R$ 10.550.000)</li>
-                    <li class="tratativa-item">71 Europa - Parcerias (R$ 9.700.000)</li>
-                </ul>
+            <div class="pipeline-col processo">
+                <div class="col-header">
+                    <h3>Processo</h3>
+                    <div class="count">
+                        <span>Total:</span>
+                        <span class="count-value" id="countProcesso">0</span>
+                    </div>
+                    <div class="vgv-total" id="vgvProcesso">R$ 0</div>
+                </div>
+                <div class="col-content" id="pipelineProcesso">
+                    </div>
+            </div>
+            
+            <div class="pipeline-col proposta">
+                <div class="col-header">
+                    <h3>Propostas</h3>
+                    <div class="count">
+                        <span>Total:</span>
+                        <span class="count-value" id="countProposta">0</span>
+                    </div>
+                    <div class="vgv-total" id="vgvProposta">R$ 0</div>
+                </div>
+                <div class="col-content" id="pipelineProposta">
+                    </div>
+            </div>
+            
+            <div class="pipeline-col tratativa">
+                <div class="col-header">
+                    <h3>Tratativas</h3>
+                    <div class="count">
+                        <span>Total:</span>
+                        <span class="count-value" id="countTratativa">0</span>
+                    </div>
+                    <div class="vgv-total" id="vgvTratativa">R$ 0</div>
+                </div>
+                <div class="col-content" id="pipelineTratativa">
+                    </div>
             </div>
 
-            <div class="timeline-card" style="width: 320px;">
-                <h4><i class="fas fa-paper-plane" style="color: #f59e0b;"></i> Propostas</h4>
-                <h5>Enviadas para o cliente (2) </h5>
-                <ul>
-                    <li class="tratativa-item">142 Europa - Store (R$ 14.000.000)</li>
-                    <li class="tratativa-item">52 Europa - Parcerias (R$ 10.000.000)</li>
-                </ul>
-            </div>
-
-            <div class="timeline-card" style="width: 320px;">
-                <h4><i class="fas fa-comments" style="color: #06b6d4;"></i> TRATATIVAS</h4>
-                <h5>Em negociação avançada</h5>
-                <ul>
-                    <li class="tratativa-item">42 Europa - Ferrari</li>
-                    <li class="tratativa-item">102 Europa - Ferrari</li>
-                    <li class="tratativa-item">72 Europa - Diretoria</li>
-                </ul>
-            </div>
         </div>
     </div>
-</div>
+    </div>
 
 <script>
     // ====================================================================
@@ -1461,95 +1631,135 @@
     let chartDiretoriaAtendimentos = null;
     let chartTipoAtendimentos = null;
 
-    // URL DO SEU GOOGLE SHEETS PUBLICADO COMO CSV (MANTIDO DO SEU CÓDIGO)
+    // URL DO SEU GOOGLE SHEETS DE ATENDIMENTOS (MANTIDO DO SEU CÓDIGO)
     const SHEET_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTx2cJTokag2KDlpWxGK5V3yk3hFehgxUrVIw9vll3ES4SduXdYTLQLtKDjWQUdCvkLa3M0teXdxeEc/pub?gid=0&single=true&output=csv'; 
     
-    // Nomes das colunas no seu arquivo CSV (Chaves dos objetos JSON)
+    // URL DO SEU GOOGLE SHEETS DE PIPELINE (CORRIGIDA E MANTIDA)
+    const PIPELINE_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSWVGFr4bPew5Q4j3mo2QLY2tPgNSDFjZ4T40X3-D8bnWwIPKnHf_nhvWE34WMRJEqGYqD3e3hnKvDz/pub?gid=0&single=true&output=csv'; 
+
+    // Nomes das colunas no seu arquivo CSV de Atendimentos
     const COL_DATA = 'Data'; 
     const COL_TIPO = 'TIPO DE VISITA'; 
     const COL_GERENTE = 'Gerente'; 
     const COL_CORRETOR = 'Corretor de atendimento'; 
-    const COL_DIRETORIA = 'Empresa'; // Usado para o filtro Diretoria/Empresa e Gráfico Diretoria
+    const COL_DIRETORIA = 'Empresa'; 
+
+    // Nomes das colunas no seu arquivo CSV de Pipeline
+    const COL_PIPELINE_STATUS = 'STATUS';
+    const COL_PIPELINE_EMPRESA = 'EMPRESA';
+    const COL_PIPELINE_UNIDADE = 'UNIDADE';
+    const COL_PIPELINE_ORIGEM = 'ORIGEM';
+    const COL_PIPELINE_TOOLTIP = 'TOOLTIP';
+    const COL_PIPELINE_VGV = 'VGV'; 
 
     // ====================================================================
     // 2. Funções Auxiliares de Dados (CSV para JSON e Data Parsing)
     // ====================================================================
 
-    // Função para tratar formatos de data (DD/MM/YYYY e YYYY-MM-DD)
     function parseDate(dateStr) {
         if (!dateStr) return null;
-        
-        // Tenta formato DD/MM/YYYY (Padrão BR)
         const parts = dateStr.split('/');
         if (parts.length === 3) {
-            // Constrói a data como YYYY-MM-DD (internacional) para evitar problemas de fuso
+            // Formato DD/MM/AAAA -> Converte para YYYY-MM-DD
             return new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
         }
-        
-        // Tenta formato YYYY-MM-DD ou outros formatos válidos (Padrão JS)
         if (dateStr.includes('-')) {
+             // Formato YYYY-MM-DD (já esperado)
              return new Date(dateStr + 'T00:00:00');
         }
-        
         return null;
     }
 
-    // Converte o texto CSV para um Array de Objetos JSON (CORRIGIDO: Menos rigoroso no número de colunas)
+    function formatCurrency(value) {
+        if (isNaN(value)) return 'R$ 0';
+        return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    /**
+     * CORREÇÃO DE BUG: Ajusta a correspondência de cabeçalho para ser insensível a maiúsculas/minúsculas.
+     * Além disso, mantém a tolerância a linhas vazias.
+     */
     function csvToJson(csv) {
-        // Remove linhas que são completamente em branco
         const lines = csv.split('\n').filter(line => line.trim() !== '');
-        if (lines.length <= 1) return [];
+        if (lines.length <= 1) return { data: [], headersFound: {} };
         
-        // Deteção de Delimitador: Prioriza ';' (padrão Google Sheets BR)
-        let delimiter = lines[0].includes(';') ? ';' : ','; 
-
-        // Limpa os cabeçalhos de aspas e espaços
-        let headers = lines[0].split(delimiter).map(h => h.trim().replace(/"/g, ''));
-
-        // Garante que não haja cabeçalhos vazios
-        headers = headers.filter(h => h.length > 0);
-
+        const firstLine = lines[0];
+        let delimiter = firstLine.includes(';') ? ';' : (firstLine.includes('\t') ? '\t' : ',');
+        
+        const originalHeaders = firstLine.split(delimiter).map(h => h.trim().replace(/"/g, ''));
+        const normalizedHeaders = originalHeaders.map(h => h.toUpperCase());
         const result = [];
+        const headersFound = {}; // Para retornar quais headers foram mapeados
+
+        const expectedHeaders = [
+            COL_DATA, COL_TIPO, COL_GERENTE, COL_CORRETOR, COL_DIRETORIA,
+            COL_PIPELINE_STATUS, COL_PIPELINE_EMPRESA, COL_PIPELINE_UNIDADE, 
+            COL_PIPELINE_ORIGEM, COL_PIPELINE_TOOLTIP, COL_PIPELINE_VGV
+        ];
+        
+        const headerIndexMap = {}; 
+
+        expectedHeaders.forEach(expectedKey => {
+            // CORREÇÃO APLICADA: Converte a chave esperada para UPPERCASE antes de procurar
+            const keyToSearch = expectedKey.toUpperCase();
+            const foundIndex = normalizedHeaders.findIndex(h => h === keyToSearch);
+            
+            if (foundIndex !== -1) {
+                // Mapeia o índice encontrado no CSV para a chave ORIGINAL (ex: 'Data')
+                headerIndexMap[expectedKey] = foundIndex; 
+                headersFound[expectedKey] = true; 
+            }
+        });
+
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line.length) continue;
             
-            // Tenta dividir a linha com o delimitador detectado
             const currentline = line.split(delimiter);
 
             const obj = {};
-            let isRowValid = false;
+            let isRowEmpty = true; 
 
-            // Itera apenas sobre o número de colunas que temos no cabeçalho
-            for (let j = 0; j < headers.length; j++) {
-                // Pega o valor, ou string vazia se a coluna não existir (tolerância)
-                let value = currentline[j] || ''; 
+            for (const expectedKey of expectedHeaders) {
+                const columnIndex = headerIndexMap[expectedKey];
                 
-                // Limpa as aspas (") e espaços extras
-                value = value.trim().replace(/"/g, ''); 
-                
-                obj[headers[j]] = value;
-
-                // Checa se o campo 'Data' tem conteúdo, mesmo que sejam apenas espaços antes de limpar.
-                if (headers[j] === COL_DATA && value !== '') {
-                    isRowValid = true;
+                if (columnIndex !== undefined && currentline.length > columnIndex) {
+                    let value = currentline[columnIndex] || ''; 
+                    value = value.trim().replace(/^"|"$/g, '').replace(/""/g, '"'); 
+                    
+                    obj[expectedKey] = value;
+                    if (value.length > 0) {
+                        isRowEmpty = false; 
+                    }
                 }
             }
             
-            // A linha só é adicionada se o campo COL_DATA tiver um valor
-            if (isRowValid) {
+            // Adiciona a linha se não estiver totalmente vazia
+            if (!isRowEmpty) {
                 result.push(obj);
             }
         }
-        return result;
+        return { data: result, headersFound: headersFound };
     }
 
-    // Função Principal de Busca de Dados (Async)
+    function contarFrequencia(data, colKey) {
+        const contagem = {};
+        data.forEach(item => {
+            const valor = (item[colKey] || 'NÃO ESPECIFICADO').trim().toUpperCase(); 
+            contagem[valor] = (contagem[valor] || 0) + 1;
+        });
+        return contagem;
+    }
+
+    // ====================================================================
+    // 3. LÓGICA DE CARREGAMENTO DE DADOS - ATENDIMENTOS (CORRIGIDA)
+    // ====================================================================
+
     async function carregarDadosPlanilha() {
         const tabelaBody = document.getElementById('tabelaAtendimentos');
         const statusArea = document.getElementById('statusArea');
         
-        statusArea.innerHTML = `<div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando dados da planilha...</div>`;
+        statusArea.innerHTML = `<div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando dados de Atendimentos...</div>`;
         tabelaBody.innerHTML = `<tr><td colspan="5" class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr>`;
 
         try {
@@ -1560,45 +1770,34 @@
             }
 
             const csvText = await response.text();
-            
-            // Converte o CSV (texto) para JSON (Array de Objetos)
-            atendimentosData = csvToJson(csvText);
+            const { data, headersFound } = csvToJson(csvText);
+            atendimentosData = data;
+
+            if (!headersFound[COL_DATA]) {
+                // A COL_DATA é 'Data'. Se não for encontrada, exibe erro.
+                statusArea.innerHTML = `<div class="error-message"><i class="fas fa-times-circle"></i> ERRO DE CABEÇALHO: Não foi possível encontrar a coluna **'${COL_DATA}'** no seu CSV. Verifique o nome exato da coluna no seu Google Sheets (deve ser 'Data').</div>`;
+                tabelaBody.innerHTML = `<tr><td colspan="5">Falha ao identificar a coluna de Data.</td></tr>`;
+                return;
+            }
 
             if (atendimentosData.length === 0) {
-                statusArea.innerHTML = `<div class="warning-message"><i class="fas fa-exclamation-triangle"></i> Planilha carregada, mas sem dados válidos (Verifique se há dados na coluna 'Data').</div>`;
+                statusArea.innerHTML = `<div class="warning-message"><i class="fas fa-exclamation-triangle"></i> Planilha carregada. Nenhum registro com dados válidos encontrado (Verifique se as colunas estão preenchidas).</div>`;
                 tabelaBody.innerHTML = `<tr><td colspan="5">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
 
-            statusArea.innerHTML = `<div class="success-message"><i class="fas fa-check-circle"></i> Dados carregados com sucesso! Total: ${atendimentosData.length} registros.</div>`;
+            statusArea.innerHTML = `<div class="success-message"><i class="fas fa-check-circle"></i> Dados de Atendimentos carregados. Total: **${atendimentosData.length}** registros.</div>`;
             
-            // Aplica filtros padrão e exibe a tabela
-            aplicarFiltros(); 
+            limparFiltros(true); // Inicializa com o período padrão
             
         } catch (error) {
             console.error('Erro no carregamento de dados:', error);
             tabelaBody.innerHTML = `<tr><td colspan="5" class="error-message">
                 <i class="fas fa-exclamation-triangle"></i> Falha ao carregar os dados.
             </td></tr>`;
-            statusArea.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-triangle"></i> Erro: Não foi possível buscar o CSV. Detalhe: ${error.message}</div>`;
+            statusArea.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-triangle"></i> Erro: Não foi possível buscar o CSV de Atendimentos. Detalhe: ${error.message}</div>`;
         }
     }
-
-    // Função para contar frequência (Usado nos gráficos)
-    function contarFrequencia(data, colKey) {
-        const contagem = {};
-        data.forEach(item => {
-            // Garante que o valor existe, remove espaços e converte para maiúsculas para agrupar variações
-            const valor = (item[colKey] || 'NÃO ESPECIFICADO').trim().toUpperCase(); 
-            contagem[valor] = (contagem[valor] || 0) + 1;
-        });
-        return contagem;
-    }
-
-
-    // ====================================================================
-    // 3. Lógica de Filtro, Busca e Paginação
-    // ====================================================================
 
     function aplicarFiltros() {
         const dataInicioStr = document.getElementById('filterDataInicio').value;
@@ -1606,22 +1805,19 @@
         const diretoria = document.getElementById('filterDiretoria').value;
         const tipo = document.getElementById('filterTipo').value;
 
-        // Datas do filtro
         const dataInicio = dataInicioStr ? new Date(dataInicioStr + 'T00:00:00') : null;
         const dataFim = dataFimStr ? new Date(dataFimStr + 'T23:59:59') : null;
 
         atendimentosFiltrados = atendimentosData.filter(item => {
-            // Filtro de Data
             const itemDate = parseDate(item[COL_DATA]);
             let passaData = true;
+            
             if (dataInicio && itemDate && itemDate < dataInicio) passaData = false;
             if (dataFim && itemDate && itemDate > dataFim) passaData = false;
 
-            // Filtro de Diretoria (Empresa) - Case insensitive
             const diretoriaKey = (item[COL_DIRETORIA] || '').trim().toUpperCase(); 
             let passaDiretoria = diretoria === 'todas' || diretoriaKey === diretoria.toUpperCase();
 
-            // Filtro de Tipo (TIPO DE VISITA) - Case insensitive
             const tipoKey = (item[COL_TIPO] || '').trim().toUpperCase(); 
             let passaTipo = tipo === 'todos' || tipoKey === tipo.toUpperCase();
 
@@ -1633,11 +1829,10 @@
         filtrarTabela();
     }
 
-    function limparFiltros() {
+    function limparFiltros(apenasSetarDatas = false) {
         document.getElementById('filterDiretoria').value = 'todas';
         document.getElementById('filterTipo').value = 'todos';
 
-        // Resetar datas para os últimos 30 dias (padrão)
         const dataFim = new Date();
         const dataInicio = new Date();
         dataInicio.setDate(dataInicio.getDate() - 30);
@@ -1645,7 +1840,9 @@
         document.getElementById('filterDataInicio').value = dataInicio.toISOString().split('T')[0];
         document.getElementById('filterDataFim').value = dataFim.toISOString().split('T')[0];
         
-        aplicarFiltros();
+        if (!apenasSetarDatas) {
+             aplicarFiltros();
+        }
     }
 
     function limparBusca() {
@@ -1656,9 +1853,7 @@
     function filtrarTabela() {
         const termoBusca = document.getElementById('searchInput').value.toLowerCase();
         
-        // Aplica filtro de busca ao conjunto já filtrado por data/dropdowns
         atendimentosPaginados = atendimentosFiltrados.filter(item => {
-            // Busca nas colunas principais: Data, Tipo, Corretor, Gerente, Empresa
             const itemString = (item[COL_DATA] || '') + ' ' +
                                (item[COL_TIPO] || '') + ' ' +
                                (item[COL_CORRETOR] || '') + ' ' +
@@ -1669,14 +1864,12 @@
         });
 
         atualizarMetricas(atendimentosPaginados);
-        // Atualiza Gráficos (Requisitos 3 e 4)
         inicializarGraficosAtendimentos(atendimentosPaginados);
         
         paginaAtual = 1;
         popularTabela(atendimentosPaginados);
     }
     
-    // Popula Tabela (Requisito 2: Garante colunas corretas)
     function popularTabela(data) {
         const tabelaBody = document.getElementById('tabelaAtendimentos');
         tabelaBody.innerHTML = '';
@@ -1698,14 +1891,12 @@
             tabelaBody.innerHTML = `<tr><td colspan="5">Nenhum registro encontrado.</td></tr>`;
         } else {
             dadosPagina.forEach(item => {
-                // Mapeamento de colunas usando as constantes (Garante a ordem e nomeclatura correta)
                 const diretoria = item[COL_DIRETORIA] || 'N/A';
                 const tipo = item[COL_TIPO] || 'N/A';
                 const corretor = item[COL_CORRETOR] || 'N/A';
                 const gerente = item[COL_GERENTE] || 'N/A';
                 const dataFormatada = item[COL_DATA] || 'N/A';
 
-                // Gera a classe CSS dinamicamente para o badge
                 const diretoriaClass = 'diretoria-' + diretoria.toLowerCase().replace(/[^a-z0-9]/g, '');
 
                 const row = `
@@ -1721,7 +1912,6 @@
             });
         }
 
-        // Atualiza a paginação
         document.getElementById('paginationInfo').textContent = `Mostrando ${inicio + 1} a ${inicio + dadosPagina.length} de ${data.length} registros`;
         document.getElementById('btnPrev').disabled = paginaAtual === 1 || data.length === 0;
         document.getElementById('btnNext').disabled = paginaAtual === totalPaginas || data.length === 0;
@@ -1732,32 +1922,20 @@
         popularTabela(atendimentosPaginados);
     }
     
-    // ====================================================================
-    // 4. Métricas e Gráficos Dinâmicos (CORRIGIDO)
-    // ====================================================================
-
     function atualizarMetricas(data) {
         const total = data.length;
-        // As chaves no CSV devem ser as mesmas usadas aqui (ex: 'YUNY STORE')
         const store = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'YUNY STORE').length;
         const homesphere = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'HOMESPHERE').length;
         const parcerias = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'PARCERIAS').length;
-        // Outras diretorias que podem estar presentes mas não tem card específico:
-        const sell = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'YUNY SELL').length;
-        const diretoriaGeral = data.filter(item => (item[COL_DIRETORIA])?.toUpperCase() === 'DIRETORIA').length;
-
 
         document.getElementById('totalAtendimentos').textContent = total;
         document.getElementById('totalStore').textContent = store;
         document.getElementById('totalHomesphere').textContent = homesphere;
         document.getElementById('totalParcerias').textContent = parcerias;
-
-        // Se quiser ver um total de todas as diretorias não especificadas:
-        // const outros = total - (store + homesphere + parcerias + sell + diretoriaGeral);
     }
 
     function inicializarGraficosAtendimentos(data = atendimentosPaginados) {
-        // 1. Gráfico de Diretoria (Pie) - REQUISITO 3: Usa apenas COL_DIRETORIA
+        // 1. Gráfico de Diretoria (Pie)
         const ctx1 = document.getElementById('chartDiretoriaAtendimentos').getContext('2d');
         if (chartDiretoriaAtendimentos) chartDiretoriaAtendimentos.destroy();
 
@@ -1779,7 +1957,7 @@
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
 
-        // 2. Gráfico de Tipo (Bar) - REQUISITO 4: Usa apenas COL_TIPO
+        // 2. Gráfico de Tipo (Bar)
         const ctx2 = document.getElementById('chartTipoAtendimentos').getContext('2d');
         if (chartTipoAtendimentos) chartTipoAtendimentos.destroy();
         
@@ -1805,14 +1983,8 @@
         });
     }
 
-    // ====================================================================
-    // 5. Exportação (CORRIGIDO) - REQUISITO 1: Exporta colunas selecionadas
-    // ====================================================================
-
     function exportarParaCSV() {
-        // Colunas a serem exportadas (usando as constantes do CSV)
         const COLUNAS_EXPORTAR = [COL_DATA, COL_TIPO, COL_CORRETOR, COL_GERENTE, COL_DIRETORIA];
-        // Cabeçalhos para o arquivo final
         const CABECALHOS_EXPORTAR = ['Data', 'Tipo de Visita', 'Corretor', 'Gerente', 'Empresa'];
 
         if (atendimentosPaginados.length === 0) {
@@ -1820,13 +1992,11 @@
             return;
         }
 
-        // Usa ; como separador e aspas para envolver valores para segurança
         let csvContent = CABECALHOS_EXPORTAR.map(h => `"${h}"`).join(";") + "\n";
 
         atendimentosPaginados.forEach(item => {
             const row = COLUNAS_EXPORTAR.map(header => {
                 let value = item[header] || '';
-                // Sanitiza o valor para CSV (envolve com aspas, troca ; por , e remove quebras de linha)
                 return `"${String(value).replace(/"/g, '""').replace(/;/, ',').replace(/\n/g, ' ')}"`;
             }).join(";");
             csvContent += row + "\n";
@@ -1846,12 +2016,157 @@
     }
     
     // ====================================================================
-    // 6. Funções de Inicialização Estáticas (MANTIDAS)
+    // 4. LÓGICA DE CARREGAMENTO DE DADOS - PIPELINE (MANTIDA)
     // ====================================================================
 
-    // Inicializar gráficos da semana - MANTIDO
+    async function carregarDadosPipeline() {
+        const pipelineStatusArea = document.getElementById('pipelineStatusArea');
+        pipelineStatusArea.innerHTML = '<span class="text-warning"><i class="fas fa-spinner fa-spin"></i> Carregando dados do Pipeline...</span>';
+
+        try {
+            const response = await fetch(PIPELINE_DATA_URL);
+            if (!response.ok) throw new Error(`Erro de rede: ${response.statusText}`);
+            
+            const csvText = await response.text();
+            const { data: dadosPipeline, headersFound } = csvToJson(csvText);
+            
+            if (!headersFound[COL_PIPELINE_UNIDADE] || !headersFound[COL_PIPELINE_STATUS]) {
+                 pipelineStatusArea.innerHTML = `<span class="error-message"><i class="fas fa-exclamation-triangle"></i> ERRO DE CABEÇALHO: Colunas **STATUS** e/ou **UNIDADE** não encontradas no CSV do Pipeline.</span>`;
+                 return;
+            }
+
+            popularPipeline(dadosPipeline);
+            
+            if (dadosPipeline.length > 0) {
+                pipelineStatusArea.innerHTML = `<span class="success-message"><i class="fas fa-check-circle"></i> Pipeline carregado com sucesso. **${dadosPipeline.length}** itens encontrados.</span>`;
+            } else {
+                 pipelineStatusArea.innerHTML = `<span class="warning-message"><i class="fas fa-exclamation-triangle"></i> **Pipeline vazio**. Nenhum dado válido encontrado.</span>`;
+            }
+
+        } catch (error) {
+            console.error('Erro ao carregar dados do pipeline:', error);
+            pipelineStatusArea.innerHTML = `<span class="error-message"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar o Pipeline. Detalhe: ${error.message}</span>`;
+        }
+    }
+
+    /**
+     * Processa os dados do pipeline, conta os itens, calcula o VGV e popula o HTML.
+     */
+    function popularPipeline(dados) {
+        // Mapeamento dos containers HTML (IDs) e inicialização de contadores e somadores de VGV
+        const columns = {
+            'VENDIDO': { count: 0, vgvSum: 0, elements: { 
+                STORE: { total: 0, vgv: 0, element: document.getElementById('vendidoStore') },
+                HOMESPHERE: { total: 0, vgv: 0, element: document.getElementById('vendidoHomesphere') },
+                PARCERIAS: { total: 0, vgv: 0, element: document.getElementById('vendidoParcerias') },
+                YUNYSELL: { total: 0, vgv: 0, element: document.getElementById('vendidoYunySell') },
+                DIRETORIA: { total: 0, vgv: 0, element: document.getElementById('vendidoDiretoria') } 
+            }, totalElement: document.getElementById('pipelineVendido')}, 
+            'PROCESSO': { count: 0, vgvSum: 0, element: document.getElementById('pipelineProcesso') },
+            'PROPOSTA': { count: 0, vgvSum: 0, element: document.getElementById('pipelineProposta') },
+            'TRATATIVA': { count: 0, vgvSum: 0, element: document.getElementById('pipelineTratativa') }
+        };
+        
+        // 1. Limpar o conteúdo anterior 
+        Object.values(columns.VENDIDO.elements).forEach(el => el.element.innerHTML = '');
+        document.getElementById('pipelineProcesso').innerHTML = '';
+        document.getElementById('pipelineProposta').innerHTML = '';
+        document.getElementById('pipelineTratativa').innerHTML = '';
+
+        // 2. Processar os dados e popular as colunas
+        dados.forEach(item => {
+            const status = (item[COL_PIPELINE_STATUS] || '').toUpperCase();
+            const nomeUnidade = item[COL_PIPELINE_UNIDADE] || 'Unidade Desconhecida';
+            const origem = item[COL_PIPELINE_ORIGEM] || 'Não Informada'; 
+            const tooltipContent = item[COL_PIPELINE_TOOLTIP] || 'Detalhe não informado.'; 
+            const vgvRaw = item[COL_PIPELINE_VGV] || '0';
+            
+            let vgvClean = vgvRaw.replace(/[^0-9,\.-]/g, '');
+            let vgvFloat = parseFloat(vgvClean.replace(/\./g, '').replace(/,/g, '.')); 
+            
+            if (isNaN(vgvFloat)) {
+                vgvFloat = parseFloat(vgvClean.replace(/,/g, ''));
+            }
+            
+            const vgvValue = isNaN(vgvFloat) ? 0 : vgvFloat;
+
+            if (nomeUnidade === 'Unidade Desconhecida') return; 
+
+            let targetContainer = null;
+            let statusClass = '';
+
+            // Lógica para a coluna VENDIDO com sub-agrupamento por EMPRESA
+            if (status === 'VENDIDO') {
+                const empresa = (item[COL_PIPELINE_EMPRESA] || 'NAOESPECIFICADO').toUpperCase().replace(/\s/g, ''); 
+                
+                const empresaKey = empresa.includes('SELL') ? 'YUNYSELL' : empresa;
+
+                if (columns.VENDIDO.elements[empresaKey]) {
+                    targetContainer = columns.VENDIDO.elements[empresaKey].element;
+                    columns.VENDIDO.count++;
+                    columns.VENDIDO.vgvSum += vgvValue;
+                    columns.VENDIDO.elements[empresaKey].total++;
+                    columns.VENDIDO.elements[empresaKey].vgv += vgvValue;
+                    statusClass = 'tratativa-row-vendido';
+                }
+            } 
+            // Lógica para as outras colunas (sem sub-agrupamento)
+            else if (columns[status]) {
+                targetContainer = columns[status].element;
+                columns[status].count++;
+                columns[status].vgvSum += vgvValue;
+                
+                if (status === 'PROCESSO') statusClass = 'tratativa-row-processo';
+                if (status === 'PROPOSTA') statusClass = 'tratativa-row-proposta';
+                if (status === 'TRATATIVA') statusClass = 'tratativa-row-tratativa';
+            }
+            
+            // Se encontrou um container, cria o item e insere
+            if (targetContainer) {
+                const itemElement = document.createElement('div');
+                itemElement.className = `tratativa-row ${statusClass}`;
+                
+                itemElement.setAttribute('data-tooltip', `${tooltipContent}${origem !== 'Não Informada' ? ' | Origem: ' + origem : ''}`); 
+
+                // MOSTRAR ORIGEM NO LUGAR DO VGV (conforme solicitado)
+                itemElement.innerHTML = `
+                    <span class="row-unit" title="${nomeUnidade}">${nomeUnidade}</span>
+                    <span class="row-origin" title="Origem: ${origem}">${origem}</span>
+                `;
+
+                targetContainer.appendChild(itemElement);
+            }
+        });
+
+        // 3. Atualizar as contagens totais e VGV nos cabeçalhos
+        
+        // VENDIDO
+        document.getElementById('countVendido').textContent = columns.VENDIDO.count;
+        document.getElementById('vgvVendido').textContent = formatCurrency(columns.VENDIDO.vgvSum);
+        
+        // Outros Status
+        document.getElementById('countProcesso').textContent = columns.PROCESSO.count;
+        document.getElementById('vgvProcesso').textContent = formatCurrency(columns.PROCESSO.vgvSum);
+        
+        document.getElementById('countProposta').textContent = columns.PROPOSTA.count;
+        document.getElementById('vgvProposta').textContent = formatCurrency(columns.PROPOSTA.vgvSum);
+        
+        document.getElementById('countTratativa').textContent = columns.TRATATIVA.count;
+        document.getElementById('vgvTratativa').textContent = formatCurrency(columns.TRATATIVA.vgvSum);
+
+        // Sub-Agrupamento VENDIDO (Diretorias)
+        document.getElementById('vgvStore').textContent = formatCurrency(columns.VENDIDO.elements.STORE.vgv);
+        document.getElementById('vgvHomesphere').textContent = formatCurrency(columns.VENDIDO.elements.HOMESPHERE.vgv);
+        document.getElementById('vgvParcerias').textContent = formatCurrency(columns.VENDIDO.elements.PARCERIAS.vgv);
+        document.getElementById('vgvYunySell').textContent = formatCurrency(columns.VENDIDO.elements.YUNYSELL.vgv);
+        document.getElementById('vgvDiretoria').textContent = formatCurrency(columns.VENDIDO.elements.DIRETORIA.vgv);
+    }
+
+    // ====================================================================
+    // 5. Funções de Inicialização Estáticas (MANTIDAS)
+    // ====================================================================
+
     function inicializarGraficosSemana() {
-        // Gráfico de pizza - Distribuição por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaSemana').getContext('2d');
         if (ctx1) {
             new Chart(ctx1, {
@@ -1874,8 +2189,6 @@
                 }
             });
         }
-
-        // Gráfico de barras - Tipo de Atendimento
         const ctx2 = document.getElementById('chartTipoAtendimento').getContext('2d');
         if (ctx2) {
             new Chart(ctx2, {
@@ -1901,9 +2214,7 @@
         }
     }
 
-    // Inicializar gráficos do OUTUBRO - MANTIDO
     function inicializarGraficosOutubro() {
-        // Gráfico de pizza - Performance por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaOutubro').getContext('2d');
         if (ctx1) {
             new Chart(ctx1, {
@@ -1926,8 +2237,6 @@
                 }
             });
         }
-
-        // Gráfico de barras - Tipo de Atendimento Outubro
         const ctx2 = document.getElementById('chartTipoAtendimentoOutubro').getContext('2d');
         if (ctx2) {
             new Chart(ctx2, {
@@ -1953,9 +2262,7 @@
         }
     }
 
-    // Inicializar gráficos do SETEMBRO - MANTIDO
     function inicializarGraficosSetembro() {
-        // Gráfico de pizza - Performance por Diretoria
         const ctx1 = document.getElementById('chartDiretoriaSetembro').getContext('2d');
         if (ctx1) {
             new Chart(ctx1, {
@@ -1978,8 +2285,6 @@
                 }
             });
         }
-
-        // Gráfico de barras - Tipo de Atendimento Setembro
         const ctx2 = document.getElementById('chartTipoAtendimentoSetembro').getContext('2d');
         if (ctx2) {
             new Chart(ctx2, {
@@ -2005,9 +2310,7 @@
         }
     }
 
-    // Inicializar gráficos do Panorama Estoque - MANTIDO
     function inicializarGraficosEstoque() {
-        // Gráfico de Vendas por Torre
         const ctx1 = document.getElementById('chartVendasTorre').getContext('2d');
         if (ctx1) {
             new Chart(ctx1, {
@@ -2034,8 +2337,6 @@
                 }
             });
         }
-
-        // Gráfico de Origem das Vendas
         const ctx2 = document.getElementById('chartOrigemVendas').getContext('2d');
         if (ctx2) {
             new Chart(ctx2, {
@@ -2063,8 +2364,6 @@
                 }
             });
         }
-
-        // Gráfico de Performance
         const ctx3 = document.getElementById('chartPerformance').getContext('2d');
         if (ctx3) {
             new Chart(ctx3, {
@@ -2072,7 +2371,7 @@
                 data: {
                     labels: ['Atingido', 'Restante'],
                     datasets: [{
-                        data: [15, 13], // 15 vendidas de 28 meta
+                        data: [15, 13], 
                         backgroundColor: ['#10b981', '#e5e7eb']
                     }]
                 },
@@ -2091,8 +2390,6 @@
                 }
             });
         }
-
-        // Gráfico Vendas vs Estoque
         const ctx4 = document.getElementById('chartVendasEstoque').getContext('2d');
         if (ctx4) {
             new Chart(ctx4, {
@@ -2123,7 +2420,7 @@
 
 
     // ====================================================================
-    // 7. Event Listener de Inicialização (MANTIDO)
+    // 6. Event Listener de Inicialização (ATUALIZADO)
     // ====================================================================
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -2148,39 +2445,52 @@
                 if (target === 'resumo-mes') inicializarGraficosOutubro();
                 if (target === 'historico-mes') inicializarGraficosSetembro();
                 if (target === 'panorama-estoque') inicializarGraficosEstoque();
-                // Chama a inicialização dos gráficos de atendimentos com os dados carregados
-                if (target === 'controle-atendimentos') inicializarGraficosAtendimentos(); 
+                if (target === 'controle-atendimentos') {
+                    if(atendimentosPaginados.length > 0) {
+                        inicializarGraficosAtendimentos(); 
+                    }
+                }
+                if (target === 'tratativas') carregarDadosPipeline(); 
             });
         });
 
-        // Configurar datas padrão
-        const dataFim = new Date();
-        const dataInicio = new Date();
-        dataInicio.setDate(dataInicio.getDate() - 30);
-        
-        document.getElementById('filterDataInicio').value = dataInicio.toISOString().split('T')[0];
-        document.getElementById('filterDataFim').value = dataFim.toISOString().split('T')[0];
+        // Configurar datas padrão (limparFiltros(true) apenas seta as datas)
+        limparFiltros(true); 
 
-        // Sistema de tooltips (mantido)
+        // Sistema de tooltips (mantido, ajustado para a classe tratativa-row)
         document.addEventListener('mouseover', function(e) {
-            if (e.target.classList.contains('tratativa-item') && e.target.hasAttribute('data-tooltip')) {
+            let targetElement = e.target;
+            while (targetElement && !targetElement.classList.contains('tratativa-row') && targetElement !== document.body) {
+                targetElement = targetElement.parentElement;
+            }
+
+            if (targetElement && targetElement.classList.contains('tratativa-row') && targetElement.hasAttribute('data-tooltip')) {
                 const tooltip = document.createElement('div');
                 tooltip.className = 'tooltip show';
-                tooltip.textContent = e.target.getAttribute('data-tooltip');
+                tooltip.textContent = targetElement.getAttribute('data-tooltip');
                 document.body.appendChild(tooltip);
                 
-                const rect = e.target.getBoundingClientRect();
-                tooltip.style.left = (rect.left + rect.width / 2 - tooltip.offsetWidth / 2) + 'px';
-                tooltip.style.top = (rect.bottom + 5) + 'px';
+                const rect = targetElement.getBoundingClientRect();
                 
-                e.target._currentTooltip = tooltip;
+                let leftPos = rect.left + rect.width / 2 - tooltip.offsetWidth / 2;
+                leftPos = Math.min(leftPos, window.innerWidth - tooltip.offsetWidth - 10);
+                leftPos = Math.max(leftPos, 10);
+
+                tooltip.style.left = leftPos + 'px';
+                tooltip.style.top = (rect.bottom + 10) + 'px';
+                
+                targetElement._currentTooltip = tooltip;
             }
         });
 
         document.addEventListener('mouseout', function(e) {
-            if (e.target.classList.contains('tratativa-item') && e.target._currentTooltip) {
-                e.target._currentTooltip.remove();
-                e.target._currentTooltip = null;
+            let targetElement = e.target;
+            while (targetElement && !targetElement.classList.contains('tratativa-row') && targetElement !== document.body) {
+                targetElement = targetElement.parentElement;
+            }
+            if (targetElement && targetElement.classList.contains('tratativa-row') && targetElement._currentTooltip) {
+                targetElement._currentTooltip.remove();
+                targetElement._currentTooltip = null;
             }
         });
 
@@ -2192,7 +2502,11 @@
 
         // Carregar dados da planilha ao iniciar o DOM
         carregarDadosPlanilha();
+        
+        // Carregar dados do pipeline ao iniciar o DOM
+        carregarDadosPipeline();
     });
 </script>
 </body>
 </html>
+```

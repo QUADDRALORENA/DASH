@@ -1,19 +1,3 @@
-Puxa, que frustração\! Peço **mil desculpas** por esse erro persistente. Você está corretíssimo: corrigimos a validação de linha no **"Controle de Atendimentos"**, mas introduzimos uma falha na identificação das colunas, resultando no **"ERRO DE CABEÇALHO: Não foi possível encontrar a coluna 'Data'"**.
-
-Este erro aconteceu por uma falha de lógica na função que mapeia as colunas (o `csvToJson`): a busca estava sendo feita de forma **sensível à capitalização** (maiúsculas/minúsculas) após a conversão dos cabeçalhos do CSV para letras maiúsculas.
-
-## 🛠️ Correção Aplicada (Foco no `csvToJson`):
-
-1.  **Correção da Correspondência de Cabeçalho:** A função `csvToJson` foi ajustada para converter o nome da coluna esperada (`'Data'`) para **letras maiúsculas** (`'DATA'`) antes de tentar encontrá-lo nos cabeçalhos do CSV. Isso garante que o código funcionará independentemente de o cabeçalho no seu Google Sheets ser "Data", "data" ou "DATA".
-2.  **Estabilidade Mantida:** A correção anterior que tornava o carregamento do CSV mais tolerante a linhas vazias/incompletas na aba **"Controle de Atendimentos"** foi preservada.
-
-Abaixo está o código HTML/JavaScript **com a correção de cabeçalho aplicada**. Por favor, substitua **todo o conteúdo** do seu arquivo `index.html` novamente:
-
------
-
-## **Arquivo `index.html` (Versão Corrigida 2.0)**
-
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>

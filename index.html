@@ -816,15 +816,39 @@
 
     <div id="statusArea"></div>
 
+    <!-- ABA RESUMO DA SEMANA DINÂMICA -->
     <div id="resumo" class="dashboard active">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
                 <i class="fas fa-bullhorn" style="color: #f59e0b;"></i>
                 Resumo da Semana
             </h1>
-            <p class="dashboard-subtitle">Panorama de 29/09/25 a 05/10/25</p>
+            <p class="dashboard-subtitle" id="resumoPeriodo">Carregando período...</p>
         </div>
 
+        <!-- FILTRO DE PERÍODO -->
+        <div class="filter-container">
+            <div class="date-range">
+                <div class="filter-group">
+                    <label for="resumoDataInicio"><i class="fas fa-calendar"></i> Data Início</label>
+                    <input type="date" id="resumoDataInicio" class="filter-input">
+                </div>
+                <div class="filter-group">
+                    <label for="resumoDataFim"><i class="fas fa-calendar"></i> Data Fim</label>
+                    <input type="date" id="resumoDataFim" class="filter-input">
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="aplicarFiltroResumo()">
+                    <i class="fas fa-filter"></i> Aplicar Filtro
+                </button>
+                <button class="btn btn-secondary" onclick="definirSemanaAtual()">
+                    <i class="fas fa-calendar-week"></i> Semana Atual
+                </button>
+            </div>
+        </div>
+
+        <!-- MÉTRICAS DINÂMICAS -->
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-header">
@@ -833,8 +857,8 @@
                 </div>
                 <div class="metric-content">
                     <p>Total de visitas:</p>
-                    <strong>8</strong>
-                    <p class="info-text">Store: 6 / Homesphere: 2 / Ferrari: 0</p>
+                    <strong id="resumoVisitas">0</strong>
+                    <p class="info-text" id="resumoVisitasDetalhe">Carregando...</p>
                 </div>
             </div>
             <div class="metric-card">
@@ -844,8 +868,8 @@
                 </div>
                 <div class="metric-content">
                     <p>Total de indicações:</p>
-                    <strong>7</strong>
-                    <p class="info-text">Store: 4 / Homesphere: 0 / Parcerias: 1 / Ferrari: 2</p>
+                    <strong id="resumoIndicacoes">0</strong>
+                    <p class="info-text" id="resumoIndicacoesDetalhe">Carregando...</p>
                 </div>
             </div>
             <div class="metric-card">
@@ -855,8 +879,8 @@
                 </div>
                 <div class="metric-content">
                     <p>Retornos na semana:</p>
-                    <strong>2</strong>
-                    <p class="info-text">Store: 1 / Homesphere: 1 / Parcerias: 0</p>
+                    <strong id="resumoRetornos">0</strong>
+                    <p class="info-text" id="resumoRetornosDetalhe">Carregando...</p>
                 </div>
             </div>
             <div class="metric-card">
@@ -866,7 +890,7 @@
                 </div>
                 <div class="metric-content">
                     <p>Propostas geradas:</p>
-                    <strong>0</strong>
+                    <strong id="resumoPropostas">0</strong>
                 </div>
             </div>
         </div>
@@ -887,37 +911,14 @@
         </div>
 
         <h2 class="timeline-header">Origem dos Clientes</h2>
-        <div class="timeline-container">
-            <div class="timeline-card">
-                <h4><i class="fas fa-map-marked-alt"></i> Visitas</h4>
-                <h5>Origem das Visitas</h5>
-                <p style="margin-bottom: 10px;">Vez: 8 atendimentos</p>
-                <ul>
-                    <li>Passagem → 4</li>
-                    <li>Vizinho → 2</li>
-                    <li>Instagram → 1</li>
-                    <li>Jogo na quadra → 1</li>
-                </ul>
-            </div>
-            <div class="timeline-card">
-                <h4><i class="fas fa-user-check"></i> Indicações</h4>
-                <h5>Origem das Indicações</h5>
-                <ul>
-                    <li>Carteira → 3</li>
-                    <li>Folheto em rua → 3</li>
-                    <li>Lead Online → 1</li>
-                </ul>
-            </div>
-            <div class="timeline-card">
-                <h4><i class="fas fa-reply"></i> Retornos</h4>
-                <h5>Origem dos Retornos</h5>
-                <ul>
-                    <li>Retorno → 2</li>
-                </ul>
+        <div class="timeline-container" id="timelineOrigem">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Carregando dados de origem...
             </div>
         </div>
     </div>
 
+    <!-- DEMAIS ABAS PERMANECEM EXATAMENTE IGUAIS AO ORIGINAL -->
     <div id="resumo-mes" class="dashboard">
         <div class="dashboard-header">
             <h1 class="dashboard-title">
@@ -1574,7 +1575,7 @@
 
 <script>
     // ====================================================================
-    // 1. Configurações Globais & URL da Planilha
+    // 1. Configurações Globais & URL da Planilha (ORIGINAL)
     // ====================================================================
     let atendimentosData = []; 
     let atendimentosFiltrados = [];
@@ -1597,6 +1598,7 @@
     const COL_GERENTE = 'Gerente'; 
     const COL_CORRETOR = 'Corretor de atendimento'; 
     const COL_DIRETORIA = 'Empresa'; 
+    const COL_MIDIA = 'Mídia'; // NOVA COLUNA PARA ORIGEM
 
     // Nomes das colunas no seu arquivo CSV de Pipeline
     const COL_PIPELINE_STATUS = 'STATUS';
@@ -1615,8 +1617,13 @@
         { key: 'DIRETORIA', label: 'DIRETORIA' }
     ];
 
+    // Variáveis específicas para o Resumo
+    let chartDiretoriaSemana = null;
+    let chartTipoAtendimentoSemana = null;
+    let dadosResumoFiltrados = [];
+
     // ====================================================================
-    // 2. Funções Auxiliares de Dados (CSV para JSON e Data Parsing)
+    // 2. Funções Auxiliares de Dados (CSV para JSON e Data Parsing) - ORIGINAL
     // ====================================================================
 
     function parseDate(dateStr) {
@@ -1655,7 +1662,7 @@
         const headersFound = {}; // Para retornar quais headers foram mapeados
 
         const expectedHeaders = [
-            COL_DATA, COL_TIPO, COL_GERENTE, COL_CORRETOR, COL_DIRETORIA,
+            COL_DATA, COL_TIPO, COL_GERENTE, COL_CORRETOR, COL_DIRETORIA, COL_MIDIA,
             COL_PIPELINE_STATUS, COL_PIPELINE_EMPRESA, COL_PIPELINE_UNIDADE, 
             COL_PIPELINE_ORIGEM, COL_PIPELINE_TOOLTIP, COL_PIPELINE_VGV
         ];
@@ -1715,7 +1722,7 @@
     }
 
     // ====================================================================
-    // 3. LÓGICA DE CARREGAMENTO DE DADOS - ATENDIMENTOS
+    // 3. LÓGICA DE CARREGAMENTO DE DADOS - ATENDIMENTOS (ORIGINAL)
     // ====================================================================
 
     async function carregarDadosPlanilha() {
@@ -1751,6 +1758,8 @@
 
             statusArea.innerHTML = `<div class="success-message"><i class="fas fa-check-circle"></i> Dados de Atendimentos carregados. Total: **${atendimentosData.length}** registros.</div>`;
             
+            // Inicializar resumo da semana após carregar dados
+            definirSemanaAtual();
             limparFiltros(true); // Inicializa com o período padrão
             
         } catch (error) {
@@ -1761,6 +1770,303 @@
             statusArea.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-triangle"></i> Erro: Não foi possível buscar o CSV de Atendimentos. Detalhe: ${error.message}</div>`;
         }
     }
+
+    // ====================================================================
+    // 4. LÓGICA DO RESUMO DA SEMANA (NOVA)
+    // ====================================================================
+
+    // Função para definir a semana atual (segunda a domingo)
+    function definirSemanaAtual() {
+        const hoje = new Date();
+        const segunda = new Date(hoje);
+        segunda.setDate(hoje.getDate() - hoje.getDay() + (hoje.getDay() === 0 ? -6 : 1));
+        
+        const domingo = new Date(segunda);
+        domingo.setDate(segunda.getDate() + 6);
+        
+        document.getElementById('resumoDataInicio').value = segunda.toISOString().split('T')[0];
+        document.getElementById('resumoDataFim').value = domingo.toISOString().split('T')[0];
+        
+        aplicarFiltroResumo();
+    }
+
+    // Função principal do filtro do resumo
+    function aplicarFiltroResumo() {
+        const dataInicioStr = document.getElementById('resumoDataInicio').value;
+        const dataFimStr = document.getElementById('resumoDataFim').value;
+        
+        if (!dataInicioStr || !dataFimStr) {
+            mostrarNotificacao('Selecione ambas as datas', 'warning');
+            return;
+        }
+        
+        const dataInicio = new Date(dataInicioStr + 'T00:00:00');
+        const dataFim = new Date(dataFimStr + 'T23:59:59');
+        
+        // Filtrar dados da planilha
+        dadosResumoFiltrados = atendimentosData.filter(item => {
+            const itemDate = parseDate(item[COL_DATA]);
+            if (!itemDate) return false;
+            
+            return itemDate >= dataInicio && itemDate <= dataFim;
+        });
+        
+        // Atualizar interface
+        atualizarResumoPeriodo(dataInicio, dataFim);
+        calcularMetricasResumo();
+        inicializarGraficosResumo();
+        atualizarTimelineOrigem();
+    }
+
+    // Atualizar o subtítulo com o período
+    function atualizarResumoPeriodo(inicio, fim) {
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        const inicioStr = inicio.toLocaleDateString('pt-BR', options);
+        const fimStr = fim.toLocaleDateString('pt-BR', options);
+        
+        document.getElementById('resumoPeriodo').textContent = `Período: ${inicioStr} a ${fimStr}`;
+    }
+
+    // Calcular todas as métricas do resumo - FUNÇÃO ATUALIZADA
+    function calcularMetricasResumo() {
+        // Contadores
+        let visitas = { total: 0, store: 0, homesphere: 0, yunysell: 0, parcerias: 0, diretoria: 0 };
+        let indicacoes = { total: 0, store: 0, homesphere: 0, yunysell: 0, parcerias: 0, diretoria: 0 };
+        let retornos = { total: 0, store: 0, homesphere: 0, yunysell: 0, parcerias: 0, diretoria: 0 };
+        let propostas = { total: 0, store: 0, homesphere: 0, yunysell: 0, parcerias: 0, diretoria: 0 };
+        
+        dadosResumoFiltrados.forEach(item => {
+            const tipo = (item[COL_TIPO] || '').toUpperCase();
+            const diretoria = (item[COL_DIRETORIA] || '').toUpperCase();
+            
+            if (tipo.includes('VEZ')) {
+                visitas.total++;
+                if (diretoria.includes('STORE')) visitas.store++;
+                else if (diretoria.includes('HOMESPHERE')) visitas.homesphere++;
+                else if (diretoria.includes('YUNY SELL') || diretoria.includes('YUNYSELL')) visitas.yunysell++;
+                else if (diretoria.includes('PARCERIAS')) visitas.parcerias++;
+                else if (diretoria.includes('DIRETORIA')) visitas.diretoria++;
+            }
+            else if (tipo.includes('INDI')) {
+                indicacoes.total++;
+                if (diretoria.includes('STORE')) indicacoes.store++;
+                else if (diretoria.includes('HOMESPHERE')) indicacoes.homesphere++;
+                else if (diretoria.includes('YUNY SELL') || diretoria.includes('YUNYSELL')) indicacoes.yunysell++;
+                else if (diretoria.includes('PARCERIAS')) indicacoes.parcerias++;
+                else if (diretoria.includes('DIRETORIA')) indicacoes.diretoria++;
+            }
+            else if (tipo.includes('RETORNO')) {
+                retornos.total++;
+                if (diretoria.includes('STORE')) retornos.store++;
+                else if (diretoria.includes('HOMESPHERE')) retornos.homesphere++;
+                else if (diretoria.includes('YUNY SELL') || diretoria.includes('YUNYSELL')) retornos.yunysell++;
+                else if (diretoria.includes('PARCERIAS')) retornos.parcerias++;
+                else if (diretoria.includes('DIRETORIA')) retornos.diretoria++;
+            }
+            else if (tipo.includes('PROPOSTA')) {
+                propostas.total++;
+                if (diretoria.includes('STORE')) propostas.store++;
+                else if (diretoria.includes('HOMESPHERE')) propostas.homesphere++;
+                else if (diretoria.includes('YUNY SELL') || diretoria.includes('YUNYSELL')) propostas.yunysell++;
+                else if (diretoria.includes('PARCERIAS')) propostas.parcerias++;
+                else if (diretoria.includes('DIRETORIA')) propostas.diretoria++;
+            }
+        });
+        
+        // Função auxiliar para formatar as diretorias (apenas as que têm atendimentos)
+        function formatarDiretorias(metricas) {
+            const partes = [];
+            if (metricas.store > 0) partes.push(`Store: ${metricas.store}`);
+            if (metricas.homesphere > 0) partes.push(`Homesphere: ${metricas.homesphere}`);
+            if (metricas.yunysell > 0) partes.push(`YunySell: ${metricas.yunysell}`);
+            if (metricas.parcerias > 0) partes.push(`Parcerias: ${metricas.parcerias}`);
+            if (metricas.diretoria > 0) partes.push(`Diretoria: ${metricas.diretoria}`);
+            return partes.join(' / ');
+        }
+        
+        // Atualizar cards
+        document.getElementById('resumoVisitas').textContent = visitas.total;
+        document.getElementById('resumoVisitasDetalhe').textContent = formatarDiretorias(visitas) || 'Nenhuma diretoria';
+        
+        document.getElementById('resumoIndicacoes').textContent = indicacoes.total;
+        document.getElementById('resumoIndicacoesDetalhe').textContent = formatarDiretorias(indicacoes) || 'Nenhuma diretoria';
+        
+        document.getElementById('resumoRetornos').textContent = retornos.total;
+        document.getElementById('resumoRetornosDetalhe').textContent = formatarDiretorias(retornos) || 'Nenhuma diretoria';
+        
+        document.getElementById('resumoPropostas').textContent = propostas.total;
+    }
+
+    // Inicializar gráficos do resumo
+    function inicializarGraficosResumo() {
+        // Gráfico de Distribuição por Diretoria
+        const ctx1 = document.getElementById('chartDiretoriaSemana').getContext('2d');
+        if (chartDiretoriaSemana) chartDiretoriaSemana.destroy();
+
+        const diretorias = contarFrequencia(dadosResumoFiltrados, COL_DIRETORIA);
+        const labels = Object.keys(diretorias);
+        const data = Object.values(diretorias);
+
+        chartDiretoriaSemana = new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Tipo de Atendimento
+        const ctx2 = document.getElementById('chartTipoAtendimento').getContext('2d');
+        if (chartTipoAtendimentoSemana) chartTipoAtendimentoSemana.destroy();
+
+        const tipos = contarFrequencia(dadosResumoFiltrados, COL_TIPO);
+        const tipoLabels = Object.keys(tipos);
+        const tipoData = Object.values(tipos);
+
+        chartTipoAtendimentoSemana = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: tipoLabels,
+                datasets: [{
+                    label: 'Quantidade',
+                    data: tipoData,
+                    backgroundColor: '#3b82f6'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Atualizar timeline de origem - FUNÇÃO CORRIGIDA
+    function atualizarTimelineOrigem() {
+        const timelineContainer = document.getElementById('timelineOrigem');
+        timelineContainer.innerHTML = '';
+
+        // Agrupar por tipo de atendimento e mídia (COLUNA G)
+        const visitasPorMidia = {};
+        const indicacoesPorMidia = {};
+        const retornosPorMidia = {};
+
+        dadosResumoFiltrados.forEach(item => {
+            const tipo = (item[COL_TIPO] || '').toUpperCase();
+            const midia = item[COL_MIDIA] || 'Não Informada';
+
+            if (tipo.includes('VEZ')) {
+                visitasPorMidia[midia] = (visitasPorMidia[midia] || 0) + 1;
+            }
+            else if (tipo.includes('INDI')) {
+                indicacoesPorMidia[midia] = (indicacoesPorMidia[midia] || 0) + 1;
+            }
+            else if (tipo.includes('RETORNO')) {
+                retornosPorMidia[midia] = (retornosPorMidia[midia] || 0) + 1;
+            }
+        });
+
+        // Card de Visitas
+        if (Object.keys(visitasPorMidia).length > 0) {
+            const totalVisitas = Object.values(visitasPorMidia).reduce((a, b) => a + b, 0);
+            const visitasCard = document.createElement('div');
+            visitasCard.className = 'timeline-card';
+            visitasCard.innerHTML = `
+                <h4><i class="fas fa-map-marked-alt"></i> Visitas</h4>
+                <h5>Origem das Visitas</h5>
+                <p style="margin-bottom: 10px;">Total: ${totalVisitas} atendimentos</p>
+                <ul>
+                    ${Object.entries(visitasPorMidia)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([midia, count]) => `<li>${midia} → ${count}</li>`)
+                    .join('')}
+                </ul>
+            `;
+            timelineContainer.appendChild(visitasCard);
+        }
+
+        // Card de Indicações
+        if (Object.keys(indicacoesPorMidia).length > 0) {
+            const totalIndicacoes = Object.values(indicacoesPorMidia).reduce((a, b) => a + b, 0);
+            const indicacoesCard = document.createElement('div');
+            indicacoesCard.className = 'timeline-card';
+            indicacoesCard.innerHTML = `
+                <h4><i class="fas fa-user-check"></i> Indicações</h4>
+                <h5>Origem das Indicações</h5>
+                <p style="margin-bottom: 10px;">Total: ${totalIndicacoes} atendimentos</p>
+                <ul>
+                    ${Object.entries(indicacoesPorMidia)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([midia, count]) => `<li>${midia} → ${count}</li>`)
+                    .join('')}
+                </ul>
+            `;
+            timelineContainer.appendChild(indicacoesCard);
+        }
+
+        // Card de Retornos
+        if (Object.keys(retornosPorMidia).length > 0) {
+            const totalRetornos = Object.values(retornosPorMidia).reduce((a, b) => a + b, 0);
+            const retornosCard = document.createElement('div');
+            retornosCard.className = 'timeline-card';
+            retornosCard.innerHTML = `
+                <h4><i class="fas fa-reply"></i> Retornos</h4>
+                <h5>Origem dos Retornos</h5>
+                <p style="margin-bottom: 10px;">Total: ${totalRetornos} atendimentos</p>
+                <ul>
+                    ${Object.entries(retornosPorMidia)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([midia, count]) => `<li>${midia} → ${count}</li>`)
+                    .join('')}
+                </ul>
+            `;
+            timelineContainer.appendChild(retornosCard);
+        }
+
+        // Se não houver dados
+        if (timelineContainer.children.length === 0) {
+            timelineContainer.innerHTML = '<div class="loading">Nenhum dado de origem encontrado para o período selecionado.</div>';
+        }
+    }
+
+    // Função de notificação
+    function mostrarNotificacao(mensagem, tipo = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${tipo}`;
+        notification.textContent = mensagem;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 4000);
+    }
+
+    // ====================================================================
+    // 5. LÓGICA DE CONTROLE DE ATENDIMENTOS (ORIGINAL - COMPLETA)
+    // ====================================================================
 
     function aplicarFiltros() {
         const dataInicioStr = document.getElementById('filterDataInicio').value;
@@ -1979,7 +2285,7 @@
     }
     
     // ====================================================================
-    // 4. LÓGICA DE CARREGAMENTO DE DADOS - PIPELINE (Refatorada para Agrupamento)
+    // 6. LÓGICA DE CARREGAMENTO DE DADOS - PIPELINE (ORIGINAL)
     // ====================================================================
 
     /**
@@ -2177,7 +2483,7 @@
     }
 
     // ====================================================================
-    // 5. Funções de Inicialização Estáticas (MANTIDAS)
+    // 7. Funções de Inicialização Estáticas (ORIGINAL)
     // ====================================================================
 
     function inicializarGraficosSemana() {
@@ -2434,7 +2740,7 @@
 
 
     // ====================================================================
-    // 6. Event Listener de Inicialização (ATUALIZADO)
+    // 8. Event Listener de Inicialização (ATUALIZADO)
     // ====================================================================
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -2455,7 +2761,9 @@
                 document.getElementById(target).classList.add('active');
                 
                 // Inicializar gráficos quando mudar de aba
-                if (target === 'resumo') inicializarGraficosSemana();
+                if (target === 'resumo') {
+                    // A aba resumo agora é dinâmica, não precisa inicializar gráficos estáticos
+                }
                 if (target === 'resumo-mes') inicializarGraficosOutubro();
                 if (target === 'historico-mes') inicializarGraficosSetembro();
                 if (target === 'panorama-estoque') inicializarGraficosEstoque();
@@ -2509,7 +2817,6 @@
         });
 
         // Inicializar gráficos estáticos iniciais
-        inicializarGraficosSemana();
         inicializarGraficosOutubro();
         inicializarGraficosSetembro();
         inicializarGraficosEstoque();

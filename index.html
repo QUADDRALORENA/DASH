@@ -800,6 +800,25 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+        /* CORREÇÕES DE CONTRASTE PARA DIRETORIAS - ADICIONAR NO FINAL DO CSS */
+        .diretoria-badge.diretoria-sell {
+            color: #000000 !important;
+            background-color: #06b6d4;
+            font-weight: 700;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .diretoria-badge.diretoria-store {
+            color: #000000 !important;
+            background-color: #6366f1;
+            font-weight: 700;
+        }
+
+        /* Garantir contraste para todos os badges */
+        .diretoria-badge {
+            font-weight: 600;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>

@@ -269,7 +269,7 @@
             border-bottom: none;
         }
 
-        /* ---------- BADGES DE DIRETORIA (cores e contraste) ---------- */
+        /* ---------- BADGES DE DIRETORIA ---------- */
         .diretoria-badge {
             display: inline-block;
             padding: 6px 10px;
@@ -850,9 +850,9 @@
     const COL_DATA = 'Data'; 
     const COL_TIPO = 'TIPO DE VISITA'; 
     
-    // AVISO: Mudei para "Gerente Atendimento" de acordo com a nossa conversa anterior.
-    // Lembre-se de mudar o nome do cabeçalho na planilha também!
-    const COL_GERENTE = 'Gerente Atendimento'; 
+    // Deixei o cabeçalho original "Gerente" para garantir que a planilha conecte,
+    // caso você não tenha alterado lá no Google Sheets ainda!
+    const COL_GERENTE = 'Gerente'; 
     
     const COL_CORRETOR = 'Corretor de atendimento'; 
     const COL_DIRETORIA = 'Empresa'; 
@@ -879,7 +879,7 @@
     let dadosResumoFiltrados = [];
 
     // ====================================================================
-    // 2. Funções Auxiliares de Dados
+    // 2. Funções Auxiliares de Dados (NOVO PARSER INCLUSO)
     // ====================================================================
 
     function parseDate(dateStr) {
@@ -899,65 +899,88 @@
         return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
-    function csvToJson(csv) {
-        const lines = csv.split('\n').filter(line => line.trim() !== '');
-        if (lines.length <= 1) return { data: [], headersFound: {} };
-        
-        const firstLine = lines[0];
-        let delimiter = firstLine.includes(';') ? ';' : (firstLine.includes('\t') ? '\t' : ',');
-        
-        const originalHeaders = firstLine.split(delimiter).map(h => h.trim().replace(/"/g, ''));
-        const normalizedHeaders = originalHeaders.map(h => h.toUpperCase());
-        const result = [];
-        const headersFound = {};
+    // === NOVO PARSER BLINDADO CONTRA QUEBRAS DE LINHA ===
+    function csvToJson(csvText) {
+        let delimiter = ',';
+        const firstLineEnd = csvText.indexOf('\n');
+        const firstLine = csvText.substring(0, firstLineEnd > -1 ? firstLineEnd : csvText.length);
+        if (firstLine.includes(';') && !firstLine.includes(',')) {
+            delimiter = ';';
+        }
 
+        const rows = [];
+        let currentRow = [];
+        let currentCell = '';
+        let insideQuotes = false;
+
+        for (let i = 0; i < csvText.length; i++) {
+            const char = csvText[i];
+            const nextChar = csvText[i + 1];
+
+            if (char === '"') {
+                if (insideQuotes && nextChar === '"') {
+                    currentCell += '"';
+                    i++;
+                } else {
+                    insideQuotes = !insideQuotes;
+                }
+            } else if (char === delimiter && !insideQuotes) {
+                currentRow.push(currentCell.trim());
+                currentCell = '';
+            } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                if (char === '\r' && nextChar === '\n') i++;
+                
+                currentRow.push(currentCell.trim());
+                if (currentRow.some(c => c !== '')) rows.push(currentRow);
+                
+                currentRow = [];
+                currentCell = '';
+            } else {
+                currentCell += char;
+            }
+        }
+        
+        if (currentCell !== '' || currentRow.length > 0) {
+            currentRow.push(currentCell.trim());
+            if (currentRow.some(c => c !== '')) rows.push(currentRow);
+        }
+
+        if (rows.length <= 1) return { data: [], headersFound: {} };
+
+        const originalHeaders = rows[0];
+        const normalizedHeaders = originalHeaders.map(h => h.toUpperCase());
+        
         const expectedHeaders = [
             COL_DATA, COL_TIPO, COL_GERENTE, COL_CORRETOR, COL_DIRETORIA, COL_MIDIA,
             COL_PIPELINE_STATUS, COL_PIPELINE_EMPRESA, COL_PIPELINE_UNIDADE, 
             COL_PIPELINE_ORIGEM, COL_PIPELINE_TOOLTIP, COL_PIPELINE_VGV
         ];
-        
-        const headerIndexMap = {}; 
+
+        const headerIndexMap = {};
+        const headersFound = {};
 
         expectedHeaders.forEach(expectedKey => {
-            const keyToSearch = expectedKey.toUpperCase();
-            const foundIndex = normalizedHeaders.findIndex(h => h === keyToSearch);
-            
+            const foundIndex = normalizedHeaders.findIndex(h => h === expectedKey.toUpperCase());
             if (foundIndex !== -1) {
-                headerIndexMap[expectedKey] = foundIndex; 
-                headersFound[expectedKey] = true; 
+                headerIndexMap[expectedKey] = foundIndex;
+                headersFound[expectedKey] = true;
             }
         });
 
-        // ====== SOLUÇÃO APLICADA AQUI (REGEX) ======
-        // Expressão Regular para não cortar aspas caso o texto possua vírgulas em seu interior
-        const regex = new RegExp(`${delimiter}(?=(?:(?:[^"]*"){2})*[^"]*$)`);
-
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line.length) continue;
-            
-            // O split usa o REGEX agora!
-            const currentline = line.split(regex);
-
+        const result = [];
+        for (let i = 1; i < rows.length; i++) {
+            const rowArr = rows[i];
             const obj = {};
-            let isRowEmpty = true; 
+            let hasData = false;
 
             for (const expectedKey of expectedHeaders) {
-                const columnIndex = headerIndexMap[expectedKey];
-                
-                if (columnIndex !== undefined && currentline.length > columnIndex) {
-                    let value = currentline[columnIndex] || ''; 
-                    value = value.trim().replace(/^"|"$/g, '').replace(/""/g, '"'); 
-                    
-                    obj[expectedKey] = value;
-                    if (value.length > 0) {
-                        isRowEmpty = false; 
-                    }
+                const colIdx = headerIndexMap[expectedKey];
+                if (colIdx !== undefined && colIdx < rowArr.length) {
+                    obj[expectedKey] = rowArr[colIdx];
+                    if (rowArr[colIdx]) hasData = true;
                 }
             }
-            
-            if (!isRowEmpty) {
+            if (hasData) {
                 result.push(obj);
             }
         }

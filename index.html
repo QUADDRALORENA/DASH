@@ -648,23 +648,23 @@
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-header"><div class="icon" style="color: #10b981;"><i class="fas fa-bullseye"></i></div><h3>Performance Unidades</h3></div>
-                <div class="metric-content"><p>Meta 1T 2026: 9 unidades</p><strong>0 unidades</strong><p class="info-text">0% de atingimento</p></div>
+                <div class="metric-content"><p>Meta 1T 2026: 9 unidades</p><strong>1 unidades</strong><p class="info-text">11% de atingimento</p></div>
             </div>
             <div class="metric-card">
                 <div class="metric-header"><div class="icon" style="color: #3b82f6;"><i class="fas fa-chart-line"></i></div><h3>Performance VGV</h3></div>
-                <div class="metric-content"><p>Meta 1T 2026: R$ 100M</p><strong>R$ 0M</strong><p class="info-text">0% de atingimento</p></div>
+                <div class="metric-content"><p>Meta 1T 2026: R$ 100M</p><strong>R$ 10M</strong><p class="info-text">10% de atingimento</p></div>
             </div>
             <div class="metric-card">
-                <div class="metric-header"><div class="icon" style="color: #f59e0b;"><i class="fas fa-calendar-check"></i></div><h3>DEZ 2025</h3></div>
-                <div class="metric-content"><p>Meta: 5 unidades</p><strong>0 unidades</strong><p class="info-text" style="color: #10b981; font-weight: bold;">0% de atingimento</p></div>
+                <div class="metric-header"><div class="icon" style="color: #f59e0b;"><i class="fas fa-calendar-check"></i></div><h3>FEV 2026</h3></div>
+                <div class="metric-content"><p>Meta: 3 unidades</p><strong>0 unidades</strong><p class="info-text" style="color: #10b981; font-weight: bold;">0% de atingimento</p></div>
             </div>
              <div class="metric-card">
-                <div class="metric-header"><div class="icon" style="color: #10b981;"><i class="fas fa-calendar-check"></i></div><h3>Janeiro 2026</h3></div>
-                <div class="metric-content"><p>Meta: 3 unidades</p><strong>0 unidades</strong><p class="info-text">0% de atingimento</p></div>
+                <div class="metric-header"><div class="icon" style="color: #10b981;"><i class="fas fa-calendar-check"></i></div><h3>MAR 2026</h3></div>
+                <div class="metric-content"><p>Meta: 3 unidades</p><strong>1 unidades</strong><p class="info-text">33% de atingimento</p></div>
             </div>
             <div class="metric-card">
                 <div class="metric-header"><div class="icon" style="color: #ef4444;"><i class="fas fa-box"></i></div><h3>Estoque Total</h3></div>
-                <div class="metric-content"><p>Unidades disponíveis:</p><strong>35 unidades</strong><p class="info-text">De 56 unidades totais</p></div>
+                <div class="metric-content"><p>Unidades disponíveis:</p><strong>34 unidades</strong><p class="info-text">De 56 unidades totais</p></div>
             </div>
         </div>
         <div class="charts-container">
@@ -1700,9 +1700,9 @@
                 type: 'doughnut',
                 data: {
                     labels: ['JARDINS', 'EUROPA', 'PARQUE'],
-                    datasets: [{ data: [5, 11, 5], backgroundColor: ['#6366f1', '#10b981', '#f59e0b'] }]
+                    datasets: [{ data: [5, 12, 5], backgroundColor: ['#6366f1', '#10b981', '#f59e0b'] }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title: { display: true, text: 'Vendas por Torre - 21 unidades' } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title: { display: true, text: 'Vendas por Torre - 22 unidades' } } }
             });
         }
         const ctx2 = document.getElementById('chartOrigemVendas').getContext('2d');
@@ -1711,7 +1711,7 @@
                 type: 'bar',
                 data: {
                     labels: ['ONLINE', 'CARTEIRA','CARTEIRA PARCERIAS', 'VEZ', 'DIRETORIA'],
-                    datasets: [{ label: 'Unidades Vendidas', data: [7, 3, 4, 1, 6], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6','#3b82f6'] }]
+                    datasets: [{ label: 'Unidades Vendidas', data: [7, 3, 4, 2, 6], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6','#3b82f6'] }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Unidades' } } } }
             });
@@ -1733,7 +1733,7 @@
                 type: 'pie',
                 data: {
                     labels: ['Vendidas', 'Em Estoque'],
-                    datasets: [{ data: [21, 35], backgroundColor: ['#10b981', '#3b82f6'] }]
+                    datasets: [{ data: [22, 34], backgroundColor: ['#10b981', '#3b82f6'] }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title: { display: true, text: 'Total: 56 unidades' } } }
             });
